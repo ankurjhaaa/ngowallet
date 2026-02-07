@@ -8,4 +8,7 @@ Route::controller(ApiController::class)->name('.api')->group(function () {
     Route::post('signup', 'signup')->name('signup');
     Route::post('login', 'login')->name('login');
     Route::post('/logout', 'logout')->name('logout');
+    
+    Route::get('/profile', 'profile')->name('profile');
+    Route::post('/editprofile', 'editProfile')->name('editProfile');
 });
