@@ -30,7 +30,7 @@ return new class extends Migration {
         DB::table('users')->insert([
             [
                 'name' => 'Admin User',
-                'email' => 'admin@gmail.com',
+                'phone' => '1111111111',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
                 'created_at' => now(),
@@ -38,7 +38,7 @@ return new class extends Migration {
             ],
             [
                 'name' => 'Normal User',
-                'email' => 'user@gmail.com',
+                'phone' => '2222222222',
                 'password' => Hash::make('password'),
                 'role' => 'user',
                 'created_at' => now(),
@@ -46,7 +46,7 @@ return new class extends Migration {
             ],
             [
                 'name' => 'Member User',
-                'email' => 'member@gmail.com',
+                'phone' => '3333333333',
                 'password' => Hash::make('password'),
                 'role' => 'member',
                 'created_at' => now(),
