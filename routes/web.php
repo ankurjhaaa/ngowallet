@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    $name = 'John Doe';
-    return Inertia::render('public/home', compact([$name => 'name']));
+    return Inertia::render('public/home');
 })->name('home');
 Route::get('/programs', function () {
     return Inertia::render('public/programs');

@@ -1,6 +1,6 @@
 import PublicLayout from "@/layouts/PublicLayout";
 
-export default function Home() {
+export default function home() {
   return (
     <PublicLayout>
 
