@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\ApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::controller(ApiController::class)->name('.api')->group(function () {
+    Route::post('signup', 'signup')->name('signup');
+    Route::post('login', 'login')->name('login');
+    Route::post('/logout', 'logout')->name('logout');
+});
