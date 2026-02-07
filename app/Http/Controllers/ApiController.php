@@ -53,7 +53,6 @@ class ApiController extends Controller
         $validator = Validator::make($request->all(), [
             'mobile' => 'required|string',
             'password' => 'required|string',
-            'role' => 'string|in:user,technician|required',
             'expo_push_token' => 'string|required',
 
         ]);
