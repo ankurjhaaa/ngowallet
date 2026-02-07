@@ -10,17 +10,18 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('user_plans', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
 
-            $table->foreignId('user_plan_id')->constrained('user_plans')->cascadeOnDelete();
+            $table->foreignId('plan_id')->constrained('plans')->cascadeOnDelete();
 
-            $table->bigInteger('amount');
-            $table->date('payment_date');
+            $table->date('start_date');
+            $table->date('end_date');
 
-            $table->enum('payment_mode', ['cash', 'upi']);
+            $table->bigInteger('yearly_amount');
 
+            $table->enum('status', ['completed', 'due'])->default('due');
             $table->timestamps();
         });
     }
@@ -30,6 +31,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('user_plans');
     }
 };

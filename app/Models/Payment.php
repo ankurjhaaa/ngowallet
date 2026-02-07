@@ -6,10 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
-    protected $fillable = [
-        'user_id',
-        'plan_id',
-        'amount',
-        'type',
-    ];
+    protected $guarded = [];
+    public function userPlan()
+    {
+        return $this->belongsTo(UserPlan::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
 }

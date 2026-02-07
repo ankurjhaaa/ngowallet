@@ -1,26 +1,26 @@
 <?php
 
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('public/home');
-})->name('home');
-Route::get('/programs', function () {
-    return Inertia::render('public/programs');
-})->name('programs');
-Route::get('/vision', function () {
-    return Inertia::render('public/vision');
-})->name('vision');
-Route::get('/join', function () {
-    return Inertia::render('public/join');
-})->name('join');
-Route::get('/login', function () {
-    return Inertia::render('auth/login');
-})->name('login');
-Route::get('/signup', function () {
-    return Inertia::render('auth/signup');
-})->name('signup');
-Route::get('/forgot-password', function () {
-    return Inertia::render('auth/forgotpassword');
-})->name('forgotpassword');
+
+Route::controller(UserController::class)->group(function () {
+    Route::get('/', 'home')->name('home');
+    Route::get('/programs', 'programs')->name('programs');
+    Route::get('/vision', 'vision')->name('vision');
+    Route::get('/join', 'join')->name('join');
+    Route::get('/login', 'login')->name('login');
+    Route::get('/signup', 'signup')->name('signup');
+    Route::get('/forgot-password', 'forgotPassword')->name('forgotpassword');
+});
+
+Route::controller(AdminController::class)->name('admin.')->prefix('admin')->group(function () {
+    Route::get('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/plans', 'plans')->name('plans');
+    Route::get('/userdetail', 'userdetail')->name('userdetail');
+    Route::get('/programs', 'programs')->name('programs');
+    Route::get('/users', 'users')->name('users');
+    Route::get('/settings', 'settings')->name('settings');
+});

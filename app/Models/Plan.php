@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Plan extends Model
 {
-    protected $fillable = [
-        'name',
-        'price',
-        'duration',
-    ];
+    protected $guarded = [];
+    public function userPlans()
+    {
+        return $this->hasMany(UserPlan::class);
+    }
+
 
 }
