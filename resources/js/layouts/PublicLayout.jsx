@@ -1,6 +1,6 @@
 import { Link, usePage } from "@inertiajs/react";
 
-export default function PublicLayout({ children }) {
+export default function publicLayout({ children }) {
     const { auth } = usePage().props;
     const user = auth?.user;
 

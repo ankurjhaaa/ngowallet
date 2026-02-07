@@ -1,5 +1,5 @@
 import { useState } from "react";
-import PublicLayout from "@/layouts/PublicLayout";
+import PublicLayout from "@/layouts/publicLayout";
 import { Link } from "@inertiajs/react";
 
 export default function login() {
