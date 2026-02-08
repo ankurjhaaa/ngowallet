@@ -25,6 +25,7 @@ export default function UserDetail() {
     /* ================= FALLBACKS ================= */
     const payingAmount = stats.payingAmount ?? 0;
     const lifetimePaid = stats.lifetimePaid ?? 0;
+    const [showUserDetails, setShowUserDetails] = useState(false);
 
     const totalDeu = payingAmount - lifetimePaid;
     const [openPayments, setOpenPayments] = useState({});
@@ -57,8 +58,8 @@ export default function UserDetail() {
         <AdminLayout>
 
             {/* ================= USER HEADER ================= */}
-            <div className="bg-white rounded-md p-6 mb-8">
-                <div className="flex justify-between items-center">
+            <div className="bg-white rounded-md p-6 mb-4">
+                <div className="flex justify-between items-start">
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-900">
                             {user.name}
@@ -70,13 +71,61 @@ export default function UserDetail() {
                             {new Date(user.created_at).toLocaleDateString("en-GB", {
                                 day: "2-digit",
                                 month: "short",
-                                year: "numeric"
+                                year: "numeric",
                             })}
                         </p>
                     </div>
-                    <StatusBadge status={user.status ?? "Active"} />
+
+                    <div className="flex items-center gap-3">
+                        <StatusBadge status={user.status ?? "active"} />
+
+                        {/* TOGGLE BUTTON */}
+                        <button
+                            onClick={() => setShowUserDetails(!showUserDetails)}
+                            className="text-gray-500 hover:text-gray-700"
+                            title="View details"
+                        >
+                            {showUserDetails ? (
+                                <i className="fa-solid fa-chevron-up text-sm"></i>
+                            ) : (
+                                <i className="fa-solid fa-chevron-down text-sm"></i>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
+            {showUserDetails && (
+                <div className="bg-white rounded-md p-6 mb-8 border border-gray-100">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                        User Details
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+
+                        <Detail label="Email" value={user.email} />
+                        <Detail label="Phone" value={user.phone} />
+                        <Detail label="Role" value={user.role} />
+                        <Detail label="Status" value={user.status} />
+                        <Detail
+                            label="Date of Birth"
+                            value={
+                                user.date_of_birth
+                                    ? new Date(user.date_of_birth).toLocaleDateString("en-GB")
+                                    : "—"
+                            }
+                        />
+                        <Detail label="Gender" value={user.gender} />
+                        <Detail label="Email Verified"
+                            value={user.email_verified_at ? "Yes" : "No"}
+                        />
+
+                        <div className="sm:col-span-2 lg:col-span-3">
+                            <Detail label="Address" value={user.address} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* ================= YEAR SUMMARY ================= */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
@@ -303,6 +352,8 @@ function PlanModal({ onClose, plans, user_id }) {
         e.preventDefault();
 
         post(`/admin/assign-plan/${data.plan_id}/${user_id}`);
+        reset();
+
     };
 
     return (
@@ -358,11 +409,7 @@ function PlanModal({ onClose, plans, user_id }) {
 
                     {/* ACTIONS */}
                     <div className="flex gap-3 mt-6">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="flex-1 h-11 rounded-md bg-gray-200 text-sm"
-                        >
+                        <button type="button" onClick={onClose} className="flex-1 h-11 rounded-md bg-gray-200 text-sm" >
                             Cancel
                         </button>
 
@@ -370,10 +417,7 @@ function PlanModal({ onClose, plans, user_id }) {
                             type="submit"
                             disabled={!data.plan_id || processing}
                             className={`flex-1 h-11 rounded-md text-sm
-                            ${data.plan_id
-                                    ? "bg-red-800 text-white"
-                                    : "bg-gray-300 text-gray-500"}`}
-                        >
+                            ${data.plan_id ? "bg-red-800 text-white" : "bg-gray-300 text-gray-500"}`} >
                             Generate Plan
                         </button>
                     </div>
@@ -383,6 +427,17 @@ function PlanModal({ onClose, plans, user_id }) {
                     Plan will be assigned for 1 year from today.
                 </p>
             </div>
+        </div>
+    );
+}
+
+function Detail({ label, value }) {
+    return (
+        <div>
+            <p className="text-xs text-gray-500">{label}</p>
+            <p className="font-medium text-gray-900 mt-1">
+                {value ?? "—"}
+            </p>
         </div>
     );
 }

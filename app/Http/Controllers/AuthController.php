@@ -20,6 +20,9 @@ class AuthController extends Controller
             return back()->withErrors(['phone' => 'Invalid credentials']);
         }
         Auth::login($user);
+        if ($user->role == 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
         return redirect()->route('home');
     }
 

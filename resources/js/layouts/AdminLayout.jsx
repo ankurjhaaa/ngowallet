@@ -55,18 +55,16 @@ export default function AdminLayout({ children }) {
                         </h1>
 
                         {/* User */}
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-600 hidden sm:block">
-                                {user?.name}
-                            </span>
-                            <button
+                        <div className="flex items-center gap-3 p-5 ">
+
+                            <Link
                                 href="/logout"
                                 method="post"
                                 as="button"
-                                className="text-sm text-red-800 hover:underline"
+                                className="text-sm text-red-800 hover:underline cursor-pointer"
                             >
                                 Logout
-                            </button>
+                            </Link>
                         </div>
                     </div>
                 </header>

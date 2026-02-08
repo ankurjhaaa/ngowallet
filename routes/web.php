@@ -15,9 +15,10 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::get('/signup', 'signup')->name('signup');
     Route::get('/forgot-password', 'forgotPassword')->name('forgotpassword');
+    Route::get('/profile', 'profile')->name('profile')->middleware('auth');
 });
 
-Route::controller(AdminController::class)->middleware(['auth','role:admin'])->name('admin.')->prefix('admin')->group(function () {
+Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->name('admin.')->prefix('admin')->group(function () {
     Route::get('/dashboard', 'dashboard')->name('dashboard');
     Route::get('/plans', 'plans')->name('plans');
     Route::get('/userdetail/{id}', 'userdetail')->name('userdetail');

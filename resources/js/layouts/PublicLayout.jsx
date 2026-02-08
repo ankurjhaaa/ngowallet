@@ -57,6 +57,20 @@ export default function publicLayout({ children }) {
                             </Link>
                         )}
                     </div>
+                    <div className=" md:hidden items-center gap-3">
+                        {!user ? (
+                            <></>
+                        ) : (
+                            <Link
+                                href="/logout"
+                                method="post"
+                                as="button"
+                                className="px-4 py-2 text-sm rounded-full text-red-700 hover:bg-red-700"
+                            >
+                                <i className="fas fa-sign-out-alt text-xl"></i>
+                            </Link>
+                        )}
+                    </div>
                 </div>
 
                 {/* Soft separator */}
@@ -90,6 +104,7 @@ export default function publicLayout({ children }) {
                             <li>About</li>
                             <li>Programs</li>
                             <li>Donate</li>
+                            <Link href="/admin/dashboard" className="text-red-800 hover:text-red-700">Admin</Link>
                         </ul>
                     </div>
 
@@ -174,13 +189,13 @@ export default function publicLayout({ children }) {
                         </Link>
                     ) : (
                         <Link
-                            href="/logout"
-                            method="post"
-                            as="button"
-                            className="flex flex-col items-center justify-center gap-1 text-red-800"
+                            href="/profile"
+                            className={`flex flex-col items-center justify-center gap-1
+                    ${usePage().url.startsWith("/profile") ? "text-red-800" : "text-gray-500"}
+                `}
                         >
-                            <i className="fas fa-sign-out-alt text-lg"></i>
-                            Logout
+                            <i className="fas fa-user text-lg"></i>
+                            Profile
                         </Link>
                     )}
                 </div>
