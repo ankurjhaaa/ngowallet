@@ -42,7 +42,7 @@ export default function publicLayout({ children }) {
                         {!user ? (
                             <Link
                                 href="/login"
-                                className="px-4 py-2 text-sm rounded-full border border-red-800 text-red-800 hover:bg-red-50"
+                                className="px-4 py-2 text-sm rounded-full bg-red-800 text-white hover:bg-red-700"
                             >
                                 Login
                             </Link>

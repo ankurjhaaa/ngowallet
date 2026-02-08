@@ -59,14 +59,14 @@ export default function AdminLayout({ children }) {
                             <span className="text-sm text-gray-600 hidden sm:block">
                                 {user?.name}
                             </span>
-                            <Link
+                            <button
                                 href="/logout"
                                 method="post"
                                 as="button"
                                 className="text-sm text-red-800 hover:underline"
                             >
                                 Logout
-                            </Link>
+                            </button>
                         </div>
                     </div>
                 </header>
