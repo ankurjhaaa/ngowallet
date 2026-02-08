@@ -98,13 +98,21 @@ class ApiController extends Controller
     {
         try {
 
-            $request->user()->currentAccessToken()->delete();
-            $request->user()->expo_push_token = null;
-            $request->user()->save();
+            $user = $request->user();
+
+            if ($user && $user->currentAccessToken()) {
+                $user->currentAccessToken()->delete();
+            }
+            if ($user && $user->expo_push_token) {
+                $user->expo_push_token = null;
+                $user->save();
+            }
+
             return response()->json([
                 'status' => true,
                 'message' => 'Logged out successfully',
             ]);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'status' => false,
@@ -112,6 +120,7 @@ class ApiController extends Controller
             ]);
         }
     }
+
 
 
     public function profile(Request $request)
@@ -213,6 +222,31 @@ class ApiController extends Controller
             "message" => "user plans fetched successfully",
             "data" => $userPlans,
         ]);
+    }
+
+    public function stats(Request $request)
+    {
+        try {
+            $fund_raised = 2500;
+            $totalSpent = 1500;
+            $totalBalance = 5000;
+            $totalDoner = 80;
+            return response()->json([
+                "status" => true,
+                "message" => "stats fetched successfully",
+                "data" => [
+                    'fund_raised' => $fund_raised,
+                    'totalSpent' => $totalSpent,
+                    'totalBalance' => $totalBalance,
+                    'totalDoner' => $totalDoner,
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                "status" => false,
+                "message" => $e->getMessage()
+            ]);
+        }
     }
 
 }
