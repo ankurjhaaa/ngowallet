@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\UserPlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -62,10 +63,32 @@ class UserController extends Controller
                         }),
                 ];
             });
-            // dd($userPlans);
+        // dd($userPlans);
         return Inertia::render('public/profile', [
             'user' => $user,
             'userPlans' => $userPlans,
         ]);
+    }
+    public function profile_update(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'gender' => 'nullable|in:male,female,other',
+            'date_of_birth' => 'nullable|date',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        $user = Auth::user();
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'gender' => $request->gender,
+            'date_of_birth' => $request->date_of_birth,
+            'address' => $request->address,
+        ]);
+
+        return redirect()->back()->with('success', 'Profile updated successfully');
     }
 }

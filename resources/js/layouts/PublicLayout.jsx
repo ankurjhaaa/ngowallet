@@ -8,7 +8,7 @@ export default function publicLayout({ children }) {
         <div className="min-h-screen bg-white flex flex-col">
 
             {/* ================= NAVBAR ================= */}
-            <header className="sticky top-0 z-50 bg-white">
+            <header className="sticky top-0 z-30 bg-white">
                 <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
 
                     {/* Logo */}
@@ -140,7 +140,7 @@ export default function publicLayout({ children }) {
             </footer>
 
 
-            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.06)] z-50 h-16">
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_10px_rgba(0,0,0,0.06)] z-30 h-16">
                 <div className="grid grid-cols-4 text-sm  items-center justify-center h-full text-gray-500">
 
                     {/* Home */}

@@ -351,7 +351,9 @@ function PlanModal({ onClose, plans, user_id }) {
     const submit = (e) => {
         e.preventDefault();
 
-        post(`/admin/assign-plan/${data.plan_id}/${user_id}`);
+        post(`/admin/assign-plan/${data.plan_id}/${user_id}`, {
+            onSuccess: () => onClose(),
+        });
         reset();
 
     };

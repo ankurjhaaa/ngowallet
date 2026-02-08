@@ -16,6 +16,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/signup', 'signup')->name('signup');
     Route::get('/forgot-password', 'forgotPassword')->name('forgotpassword');
     Route::get('/profile', 'profile')->name('profile')->middleware('auth');
+    Route::post('/profile_update', 'profile_update')->name('profile_update')->middleware('auth');
 });
 
 Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->name('admin.')->prefix('admin')->group(function () {
