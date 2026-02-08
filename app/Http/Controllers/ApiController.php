@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -154,7 +155,7 @@ class ApiController extends Controller
             $user->address = $request->address;
             $user->date_of_birth = $request->date_of_birth;
             $user->gender = $request->gender;
-            
+
             if ($request->filled('password')) {
                 $user->password = Hash::make($request->password);
 
@@ -173,6 +174,45 @@ class ApiController extends Controller
             ]);
 
         }
+    }
+
+    public function user_plan(Request $request, $user_id)
+    {
+        try {
+            $userPlans = UserPlan::with('plan')
+                ->where('user_id', $user_id)
+                ->latest()
+                ->get()
+                ->map(function ($up) {
+                    return [
+                        'id' => $up->id,
+                        'name' => $up->plan?->name,
+                        'yearly_amount' => $up->yearly_amount,
+                        'due_amount' => $up->dueAmount(),
+                        'start_date' => $up->start_date,
+                        'end_date' => $up->end_date,
+                        'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
+                        'payments' => $up->payments()->latest()->get()->
+                            map(function ($payment) {
+                                return [
+                                    'amount' => $payment->amount,
+                                    'payment_date' => $payment->payment_date,
+                                    'payment_mode' => $payment->payment_mode,
+                                ];
+                            }),
+                    ];
+                });
+        } catch (\Throwable $e) {
+            return response()->json([
+                "status" => false,
+                "message" => $e->getMessage()
+            ]);
+        }
+        return response()->json([
+            "status" => true,
+            "message" => "user plans fetched successfully",
+            "data" => $userPlans,
+        ]);
     }
 
 }
