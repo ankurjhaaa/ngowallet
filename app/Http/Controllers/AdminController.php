@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use App\Models\Plan;
+use App\Models\Spend;
 use App\Models\User;
 use App\Models\UserPlan;
 use Illuminate\Http\Request;
@@ -13,7 +14,24 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        return Inertia::render('admin/dashboard');
+        $totalCommitment = UserPlan::sum('yearly_amount');
+        $fund_raised = Payment::sum('amount');
+        $totalSpent = Spend::sum('amount');
+        $totalBalance = $fund_raised - $totalSpent;
+        $totalDoner = User::whereHas('userPlans.payments', function ($query) {
+            $query->where('amount', '>', 0);
+        })->count();
+        $recentPayments = Payment::with('user')->latest()->take(5)->get();
+        $recentExpenses = Spend::latest()->take(5)->get();
+        return Inertia::render('admin/dashboard', [
+            'fund_raised' => $fund_raised,
+            'totalSpent' => $totalSpent,
+            'totalBalance' => $totalBalance,
+            'totalDoner' => $totalDoner,
+            'totalCommitment' => $totalCommitment,
+            'recentPayments' => $recentPayments,
+            'recentExpenses' => $recentExpenses,
+        ]);
     }
     public function plans()
     {
@@ -139,8 +157,33 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Payment added successfully');
     }
+    public function expense(Request $request)
+    {
+        $expenses = Spend::latest()->paginate(8);
 
+        return Inertia::render('admin/addexpense', [
+            'expenses' => $expenses,
+        ]);
+    }
 
+    public function addexpense(Request $request)
+    {
+        // Validate the request data
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'description' => 'required|string',
+        ]);
+
+        // Create a new expense record
+        Spend::create([
+            'user_id' => auth()->id(),
+            'amount' => $request->amount,
+            'description' => $request->description,
+            'date' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Expense added successfully');
+    }
 
     public function settings()
     {

@@ -25,6 +25,8 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/userdetail/{id}', 'userdetail')->name('userdetail');
     Route::post('/assign-plan/{plan_id}/{user_id}', 'assignPlan')->name('assignplan');
     Route::post('/add-payment/{user_id}', 'addPayment')->name('addpayment');
+    Route::get('/expense', 'expense')->name('expense');
+    Route::post('/add-expenses', 'addexpense')->name('addexpense');
 
 
 

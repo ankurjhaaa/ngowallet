@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
+use App\Models\Spend;
+use App\Models\User;
 use App\Models\UserPlan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +14,18 @@ class UserController extends Controller
 {
     public function home()
     {
-        return Inertia::render('public/home');
+        $fund_raised = Payment::sum('amount');
+        $totalSpent = Spend::sum('amount');
+        $totalBalance = $fund_raised - $totalSpent;
+        $totalDoner = User::whereHas('userPlans.payments', function ($query) {
+            $query->where('amount', '>', 0);
+        })->count();
+        return Inertia::render('public/home', [
+            'fund_raised' => $fund_raised,
+            'totalSpent' => $totalSpent,
+            'totalBalance' => $totalBalance,
+            'totalDoner' => $totalDoner,
+        ]);
     }
     public function programs()
     {

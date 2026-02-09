@@ -22,8 +22,9 @@ class AuthController extends Controller
         Auth::login($user);
         if ($user->role == 'admin') {
             return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('profile');
         }
-        return redirect()->route('home');
     }
 
     public function signup_post(Request $request)

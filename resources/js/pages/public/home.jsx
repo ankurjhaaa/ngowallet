@@ -1,6 +1,13 @@
 import PublicLayout from "@/layouts/PublicLayout";
+import { usePage } from "@inertiajs/react";
 
 export default function home() {
+  const {
+    fund_raised,
+    totalSpent,
+    totalBalance,
+    totalDoner
+  } = usePage().props;
   return (
     <PublicLayout>
 
@@ -31,10 +38,10 @@ export default function home() {
       <section className="py-12">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
 
-          <StatCard icon="fa-wallet" title="Funds Raised" value="₹12.5L" />
-          <StatCard icon="fa-hand-holding-heart" title="Spent" value="₹9.8L" />
-          <StatCard icon="fa-piggy-bank" title="Balance" value="₹2.7L" />
-          <StatCard icon="fa-users" title="People Helped" value="1450+" />
+          <StatCard icon="fa-wallet" title="Funds Raised" value={`₹${fund_raised}`} />
+          <StatCard icon="fa-hand-holding-heart" title="Spent" value={`₹${totalSpent}`} />
+          <StatCard icon="fa-piggy-bank" title="Balance" value={`₹${totalBalance}`} />
+          <StatCard icon="fa-users" title="People Helped" value={totalDoner} />
 
         </div>
       </section>

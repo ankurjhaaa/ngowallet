@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Payment;
+use App\Models\Spend;
 use App\Models\User;
 use App\Models\UserPlan;
 use Illuminate\Http\Request;
@@ -227,10 +229,12 @@ class ApiController extends Controller
     public function stats(Request $request)
     {
         try {
-            $fund_raised = 2500;
-            $totalSpent = 1500;
-            $totalBalance = 5000;
-            $totalDoner = 80;
+            $fund_raised = Payment::sum('amount');
+            $totalSpent = Spend::sum('amount');
+            $totalBalance = $fund_raised - $totalSpent;
+            $totalDoner = User::whereHas('userPlans.payments', function ($query) {
+                $query->where('amount', '>', 0);
+            })->count();
             return response()->json([
                 "status" => true,
                 "message" => "stats fetched successfully",

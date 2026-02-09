@@ -1,6 +1,8 @@
 import AdminLayout from "@/layouts/AdminLayout";
+import { usePage } from "@inertiajs/react";
 
 export default function Dashboard() {
+    const { totalCommitment, fund_raised, totalSpent, totalBalance, totalDoner, recentPayments = [], recentExpenses = [] } = usePage().props;
     return (
         <AdminLayout>
 
@@ -22,46 +24,91 @@ export default function Dashboard() {
             ">
                 <StatCard
                     title="Total Commitment"
-                    value="₹ 2,500"
+                    value={`₹ ${totalCommitment}`}
                     icon="fa-hand-holding-heart"
                 />
                 <StatCard
                     title="Amount Received"
-                    value="₹ 18,000"
+                    value={`₹ ${fund_raised}`}
+
                     icon="fa-wallet"
                 />
                 <StatCard
                     title="Remaining Balance"
-                    value="₹ 68,600"
+                    value={`₹ ${totalBalance}`}
                     icon="fa-piggy-bank"
                 />
                 <StatCard
                     title="Active Supporters"
-                    value="62"
+                    value={totalDoner}
                     icon="fa-users"
                 />
             </div>
 
             {/* ================= LOWER GRID ================= */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10 items-start">
+
 
                 {/* ================= ACTIVITY ================= */}
-                <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
-                    <h2 className="text-sm font-semibold text-gray-900 mb-5">
-                        Recent Activity
+                <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-5">
+                    <h2 className="text-sm font-semibold text-gray-900 mb-4">
+                        Recent Payments
                     </h2>
 
-                    <div className="space-y-4">
-                        <Activity text="₹50,000 received from Ramesh Kumar" time="2 hours ago" />
-                        <Activity text="New yearly commitment added (₹1,20,000)" time="Yesterday" />
-                        <Activity text="Healthcare program updated" time="2 days ago" />
-                        <Activity text="New supporter joined: Anita Sharma" time="3 days ago" />
+                    <div className="space-y-3">
+                        {recentPayments.map((payment, index) => (
+                            <div
+                                key={`payment-${index}`}
+                                className="bg-gray-50 rounded-md p-3"
+                            >
+                                <div className="flex justify-between items-center mb-1">
+                                    <p className="text-sm font-semibold text-red-800">
+                                        ₹ {payment.amount}
+                                    </p>
+                                    <span className="text-xs text-gray-400">
+                                        {payment.payment_date}
+                                    </span>
+                                </div>
+
+                                <p className="text-sm text-gray-700 truncate">
+                                    Received from {payment.user.name}
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-5">
+                    <h2 className="text-sm font-semibold text-gray-900 mb-4">
+                        Recent Expenses
+                    </h2>
+
+                    <div className="space-y-3">
+                        {recentExpenses.map((expense, index) => (
+                            <div
+                                key={`expense-${index}`}
+                                className="bg-gray-50 rounded-md p-3"
+                            >
+                                <div className="flex justify-between items-center mb-1">
+                                    <p className="text-sm font-semibold text-red-800">
+                                        ₹ {expense.amount}
+                                    </p>
+                                    <span className="text-xs text-gray-400">
+                                        {expense.date}
+                                    </span>
+                                </div>
+
+                                {/* DESCRIPTION WITH TRUNCATE */}
+                                <p className="text-sm text-gray-700 line-clamp-2">
+                                    {expense.description}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* ================= QUICK ACTIONS ================= */}
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h2 className="text-sm font-semibold text-gray-900 mb-5">
+
+                <div className="bg-white rounded-lg shadow-sm p-5">
+                    <h2 className="text-sm font-semibold text-gray-900 mb-4">
                         Quick Actions
                     </h2>
 
@@ -71,6 +118,7 @@ export default function Dashboard() {
                         <Action label="View Reports" icon="fa-file-alt" href="/admin/reports" />
                     </div>
                 </div>
+
 
             </div>
 
