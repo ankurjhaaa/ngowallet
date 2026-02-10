@@ -1,8 +1,10 @@
 import { Link, usePage } from "@inertiajs/react";
+import { useState } from "react";
 
 export default function publicLayout({ children }) {
     const { auth } = usePage().props;
     const user = auth?.user;
+    const [open, setOpen] = useState(false);
 
     return (
         <div className="min-h-screen bg-white flex flex-col">
@@ -38,23 +40,55 @@ export default function publicLayout({ children }) {
                     </nav>
 
                     {/* Auth Buttons */}
-                    <div className="hidden md:flex items-center gap-3">
+                    <div className="hidden md:flex items-center relative">
                         {!user ? (
                             <Link
                                 href="/login"
-                                className="px-4 py-2 text-sm rounded-full bg-red-800 text-white hover:bg-red-700"
+                                className="px-4 py-2 text-sm rounded-full bg-red-800 text-white hover:bg-red-700 transition"
                             >
                                 Login
                             </Link>
                         ) : (
-                            <Link
-                                href="/logout"
-                                method="post"
-                                as="button"
-                                className="px-4 py-2 text-sm rounded-full bg-red-800 text-white hover:bg-red-700"
-                            >
-                                Logout
-                            </Link>
+                            <>
+                                {/* USER NAME BUTTON */}
+                                <button
+                                    onClick={() => setOpen(!open)}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-red-800 text-white hover:bg-red-700 transition"
+                                >
+                                    {user.name}
+                                    <svg
+                                        className={`w-4 h-4 transition-transform ${open ? "rotate-180" : ""
+                                            }`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                {/* DROPDOWN */}
+                                {open && (
+                                    <div className="absolute right-0 top-12 w-40 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                                        <Link
+                                            href="/profile"
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                                        >
+                                            Profile
+                                        </Link>
+
+                                        <Link
+                                            href="/logout"
+                                            method="post"
+                                            as="button"
+                                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition"
+                                        >
+                                            Logout
+                                        </Link>
+                                    </div>
+                                )}
+                            </>
                         )}
                     </div>
                     <div className=" md:hidden items-center gap-3">

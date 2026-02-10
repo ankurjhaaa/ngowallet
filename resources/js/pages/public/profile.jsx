@@ -303,7 +303,9 @@ function EditProfileModal({ user, onClose }) {
                         <select
                             value={data.gender}
                             onChange={e => setData("gender", e.target.value)}
-                            className="w-full h-11 mt-1 rounded-md bg-gray-50 px-4 border focus:ring-2 focus:ring-red-200"
+                            className="w-full h-11 mt-1 rounded-md bg-gray-50 px-4
+                           border border-gray-200 text-sm
+                           focus:ring-2 focus:ring-red-200 border-outline-none"
                         >
                             <option value="">Select gender</option>
                             <option value="male">Male</option>
@@ -319,6 +321,7 @@ function EditProfileModal({ user, onClose }) {
                         value={data.date_of_birth}
                         onChange={e => setData("date_of_birth", e.target.value)}
                         error={errors.date_of_birth}
+                        
                     />
 
                     <div>
@@ -327,7 +330,7 @@ function EditProfileModal({ user, onClose }) {
                             value={data.address}
                             onChange={e => setData("address", e.target.value)}
                             rows="3"
-                            className="w-full mt-1 rounded-md bg-gray-50 px-4 py-2 border focus:ring-2 focus:ring-red-200"
+                            className="w-full mt-1 rounded-md bg-gray-50 px-4 py-2 border focus:ring-2 focus:ring-red-200 border-gray-200"
                         />
                         {errors.address && <Error text={errors.address} />}
                     </div>
@@ -371,7 +374,7 @@ function Input({ label, ...props }) {
                 {...props}
                 className="w-full h-11 mt-1 rounded-md bg-gray-50 px-4
                            border border-gray-200 text-sm
-                           focus:ring-2 focus:ring-red-200"
+                           focus:ring-2 focus:ring-red-200 border-outline-none"
             />
         </div>
     );

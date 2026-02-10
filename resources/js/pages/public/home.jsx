@@ -1,5 +1,5 @@
 import PublicLayout from "@/layouts/PublicLayout";
-import { usePage } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 
 export default function home() {
   const {
@@ -10,6 +10,7 @@ export default function home() {
   } = usePage().props;
   return (
     <PublicLayout>
+      <Head title="Home" />
 
       {/* ================= HERO ================= */}
       <section className="max-w-7xl mx-auto px-4 pt-20 pb-16 text-center">
