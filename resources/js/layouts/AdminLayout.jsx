@@ -33,6 +33,7 @@ export default function AdminLayout({ children }) {
                     <SidebarLink href="/admin/dashboard" label="Dashboard" icon="fa-chart-line" active={active("/admin/dashboard")} />
                     <SidebarLink href="/admin/users" label="Users" icon="fa-users" active={active("/admin/users")} />
                     <SidebarLink href="/admin/expense" label="expense" icon="fa-money-bill-wave" active={active("/admin/expense")} />
+                    <SidebarLink href="/admin/add-member-page" label="Add Member" icon="fa-user" active={active("/admin/add-member-page")} />
                     <SidebarLink href="/admin/programs" label="Programs" icon="fa-hand-holding-heart" active={active("/admin/programs")} />
                     <SidebarLink href="/admin/transactions" label="Transactions" icon="fa-wallet" active={active("/admin/transactions")} />
                     <SidebarLink href="/admin/reports" label="Reports" icon="fa-file-alt" active={active("/admin/reports")} />

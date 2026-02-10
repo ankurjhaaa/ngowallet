@@ -8,6 +8,7 @@ use App\Models\Spend;
 use App\Models\User;
 use App\Models\UserPlan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class AdminController extends Controller
@@ -183,6 +184,34 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Expense added successfully');
+    }
+    public function addmemberpage()
+    {
+        return Inertia::render('admin/addmember');
+    }
+    public function addmember(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable',
+            'phone' => 'required|max:20|unique:users',
+            'password' => 'required',
+            'role' => 'nullable',
+            'gender' => 'nullable',
+            'address' => 'nullable',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'gender' => $request->gender,
+            'address' => $request->address,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+        ]);
+
+        return redirect()->route('admin.dashboard')->with('success', 'Member created successfully');
     }
 
     public function settings()

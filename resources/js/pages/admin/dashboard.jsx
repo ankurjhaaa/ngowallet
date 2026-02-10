@@ -1,5 +1,5 @@
 import AdminLayout from "@/layouts/AdminLayout";
-import { usePage } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 
 export default function Dashboard() {
     const { totalCommitment, fund_raised, totalSpent, totalBalance, totalDoner, recentPayments = [], recentExpenses = [] } = usePage().props;
@@ -113,7 +113,7 @@ export default function Dashboard() {
                     </h2>
 
                     <div className="space-y-2">
-                        <Action label="Add New Program" icon="fa-plus" href="/admin/programs/create" />
+                        <Action label="Add New Member" icon="fa-user" href="/admin/add-member-page" />
                         <Action label="Add Commitment" icon="fa-calendar-plus" href="/admin/commitments/create" />
                         <Action label="View Reports" icon="fa-file-alt" href="/admin/reports" />
                     </div>
@@ -172,7 +172,7 @@ function Activity({ text, time }) {
 
 function Action({ label, icon, href }) {
     return (
-        <a
+        <Link
             href={href}
             className="
                 flex items-center gap-3 px-3 py-2 rounded-md
@@ -188,6 +188,6 @@ function Action({ label, icon, href }) {
                 <i className={`fas ${icon} text-xs`}></i>
             </div>
             {label}
-        </a>
+        </Link>
     );
 }

@@ -27,7 +27,8 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::post('/add-payment/{user_id}', 'addPayment')->name('addpayment');
     Route::get('/expense', 'expense')->name('expense');
     Route::post('/add-expenses', 'addexpense')->name('addexpense');
-
+    Route::get('/add-member-page', 'addmemberpage')->name('addmemberpage');
+    Route::post('/add-member', 'addmember')->name('addmember');
 
 
     Route::get('/programs', 'programs')->name('programs');
