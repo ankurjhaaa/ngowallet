@@ -72,7 +72,7 @@ export default function publicLayout({ children }) {
                                 {open && (
                                     <div className="absolute right-0 top-12 w-40 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
                                         <Link
-                                            href="/profile"
+                                            href={user.role === "admin" ? "/admin/dashboard" : "/profile"}
                                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
                                         >
                                             Profile
@@ -223,7 +223,7 @@ export default function publicLayout({ children }) {
                         </Link>
                     ) : (
                         <Link
-                            href="/profile"
+                            href={user.role === "admin" ? "/admin/dashboard" : "/profile"}
                             className={`flex flex-col items-center justify-center gap-1
                     ${usePage().url.startsWith("/profile") ? "text-red-800" : "text-gray-500"}
                 `}

@@ -13,17 +13,32 @@ use Inertia\Inertia;
 
 class AdminController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
+        $search = $request->search;
+
         $totalCommitment = UserPlan::sum('yearly_amount');
         $fund_raised = Payment::sum('amount');
         $totalSpent = Spend::sum('amount');
         $totalBalance = $fund_raised - $totalSpent;
+
         $totalDoner = User::whereHas('userPlans.payments', function ($query) {
             $query->where('amount', '>', 0);
         })->count();
+
         $recentPayments = Payment::with('user')->latest()->take(5)->get();
         $recentExpenses = Spend::latest()->take(5)->get();
+
+        $allUsers = User::when($search, function ($query, $search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        })
+            ->latest()
+            ->paginate(6)
+            ->withQueryString(); // IMPORTANT
+
         return Inertia::render('admin/dashboard', [
             'fund_raised' => $fund_raised,
             'totalSpent' => $totalSpent,
@@ -32,8 +47,13 @@ class AdminController extends Controller
             'totalCommitment' => $totalCommitment,
             'recentPayments' => $recentPayments,
             'recentExpenses' => $recentExpenses,
+            'allUsers' => $allUsers,
+            'filters' => [
+                'search' => $search
+            ]
         ]);
     }
+
     public function plans()
     {
         return Inertia::render('admin/plans');
@@ -201,7 +221,7 @@ class AdminController extends Controller
             'address' => 'nullable',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
@@ -211,7 +231,7 @@ class AdminController extends Controller
             'role' => $request->role,
         ]);
 
-        return redirect()->route('admin.dashboard')->with('success', 'Member created successfully');
+        return redirect()->route('admin.userdetail', $user->id)->with('success', 'Member created successfully');
     }
 
     public function settings()
