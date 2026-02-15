@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 class ApiController extends Controller
 {
+
     public function signup(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -51,6 +52,7 @@ class ApiController extends Controller
             ], 500);
         }
     }
+
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -96,6 +98,7 @@ class ApiController extends Controller
         }
 
     }
+
     public function logout(Request $request)
     {
         try {
@@ -122,8 +125,6 @@ class ApiController extends Controller
             ]);
         }
     }
-
-
 
     public function profile(Request $request)
     {
@@ -187,6 +188,7 @@ class ApiController extends Controller
         }
     }
 
+
     public function user_plan(Request $request, $user_id)
     {
         try {
@@ -235,6 +237,7 @@ class ApiController extends Controller
             $totalDoner = User::whereHas('userPlans.payments', function ($query) {
                 $query->where('amount', '>', 0);
             })->count();
+            $ngo_payments = Spend::latest()->get();
             return response()->json([
                 "status" => true,
                 "message" => "stats fetched successfully",
@@ -243,6 +246,7 @@ class ApiController extends Controller
                     'totalSpent' => $totalSpent,
                     'totalBalance' => $totalBalance,
                     'totalDoner' => $totalDoner,
+                    'ngo_payments' => $ngo_payments,
                 ],
             ]);
         } catch (\Throwable $e) {
