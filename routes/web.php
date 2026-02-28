@@ -34,6 +34,15 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/programs', 'programs')->name('programs');
     Route::get('/users', 'users')->name('users');
     Route::get('/settings', 'settings')->name('settings');
+
+    // Plan CRUD
+    Route::post('/plans', 'storePlan')->name('storeplan');
+    Route::put('/plans/{id}', 'updatePlan')->name('updateplan');
+    Route::delete('/plans/{id}', 'destroyPlan')->name('destroyplan');
+
+    // User Edit + Password
+    Route::put('/user/{id}', 'updateUser')->name('updateuser');
+    Route::put('/user/{id}/password', 'updateUserPassword')->name('updateuserpassword');
 });
 
 Route::controller(AuthController::class)->group(function () {

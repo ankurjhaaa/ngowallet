@@ -43,13 +43,13 @@ export default function forgotpassword() {
                             <input
                                 type="tel"
                                 placeholder="Enter registered phone number"
-                                className="mt-1 w-full px-4 py-2.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-red-200"
+                                className="mt-1 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-gray-50"
                             />
                         </div>
 
                         <button
                             type="submit"
-                            className="w-full bg-red-800 text-white py-2.5 rounded-md hover:bg-red-700 transition"
+                            className="w-full bg-emerald-800 text-white py-2.5 rounded-lg hover:bg-emerald-700 transition font-medium"
                         >
                             Send Reset Link / OTP
                         </button>
@@ -58,7 +58,7 @@ export default function forgotpassword() {
                     {/* Back link */}
                     <p className="text-sm text-center text-gray-500 mt-4">
                         Remembered your password?{" "}
-                        <a href="/login" className="text-red-800 hover:underline">
+                        <a href="/login" className="text-emerald-700 hover:underline font-medium">
                             Login
                         </a>
                     </p>

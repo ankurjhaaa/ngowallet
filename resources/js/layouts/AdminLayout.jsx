@@ -32,11 +32,11 @@ export default function AdminLayout({ children }) {
                 <nav className="px-4 mt-4 space-y-1 text-[14px]">
                     <SidebarLink href="/admin/dashboard" label="Dashboard" icon="fa-chart-line" active={active("/admin/dashboard")} />
                     <SidebarLink href="/admin/users" label="Users" icon="fa-users" active={active("/admin/users")} />
-                    <SidebarLink href="/admin/expense" label="expense" icon="fa-money-bill-wave" active={active("/admin/expense")} />
-                    <SidebarLink href="/admin/add-member-page" label="Add Member" icon="fa-user" active={active("/admin/add-member-page")} />
+                    <SidebarLink href="/admin/plans" label="Plans" icon="fa-clipboard-list" active={active("/admin/plans")} />
+                    <SidebarLink href="/admin/expense" label="Expense" icon="fa-money-bill-wave" active={active("/admin/expense")} />
+                    <SidebarLink href="/admin/add-member-page" label="Add Member" icon="fa-user-plus" active={active("/admin/add-member-page")} />
                     <SidebarLink href="/admin/programs" label="Programs" icon="fa-hand-holding-heart" active={active("/admin/programs")} />
-                    <SidebarLink href="/admin/transactions" label="Transactions" icon="fa-wallet" active={active("/admin/transactions")} />
-                    <SidebarLink href="/admin/reports" label="Reports" icon="fa-file-alt" active={active("/admin/reports")} />
+                    <SidebarLink href="/admin/settings" label="Settings" icon="fa-cog" active={active("/admin/settings")} />
                 </nav>
 
                 {/* ================= BOTTOM USER ================= */}
@@ -83,7 +83,7 @@ export default function AdminLayout({ children }) {
                 </header>
 
                 {/* ================= CONTENT ================= */}
-                <main className="flex-1 p-6">
+                <main className="flex-1 p-6 min-w-0">
                     {children}
                 </main>
             </div>

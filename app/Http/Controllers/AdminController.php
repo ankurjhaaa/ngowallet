@@ -56,7 +56,57 @@ class AdminController extends Controller
 
     public function plans()
     {
-        return Inertia::render('admin/plans');
+        $plans = Plan::latest()->get();
+        return Inertia::render('admin/plans', [
+            'plans' => $plans,
+        ]);
+    }
+
+    public function storePlan(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'yearly_amount' => 'required|numeric|min:1',
+            'duration_years' => 'required|integer|min:1',
+        ]);
+
+        Plan::create([
+            'name' => $request->name,
+            'yearly_amount' => $request->yearly_amount,
+            'duration_years' => $request->duration_years,
+        ]);
+
+        return redirect()->back()->with('success', 'Plan created successfully');
+    }
+
+    public function updatePlan(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'yearly_amount' => 'required|numeric|min:1',
+            'duration_years' => 'required|integer|min:1',
+        ]);
+
+        $plan = Plan::findOrFail($id);
+        $plan->update([
+            'name' => $request->name,
+            'yearly_amount' => $request->yearly_amount,
+            'duration_years' => $request->duration_years,
+        ]);
+
+        return redirect()->back()->with('success', 'Plan updated successfully');
+    }
+
+    public function destroyPlan($id)
+    {
+        $plan = Plan::findOrFail($id);
+
+        if ($plan->userPlans()->exists()) {
+            return redirect()->back()->withErrors(['plan' => 'Cannot delete plan — it is assigned to users.']);
+        }
+
+        $plan->delete();
+        return redirect()->back()->with('success', 'Plan deleted successfully');
     }
     public function userdetail($id)
     {
@@ -72,12 +122,10 @@ class AdminController extends Controller
             'stats' => [
                 'payingAmount' => $payingAmount,
                 'lifetimePaid' => $totalPaidLifetime,
-
             ],
             'ngo_plans' => Plan::all(),
-            'due_plan' => UserPlan::with('plan')
+            'user_plans' => UserPlan::with('plan')
                 ->where('user_id', $id)
-                ->where('status', 'due')
                 ->latest()
                 ->get()
                 ->map(function ($up) {
@@ -88,6 +136,7 @@ class AdminController extends Controller
                         'due_amount' => $up->dueAmount(),
                         'start_date' => $up->start_date,
                         'end_date' => $up->end_date,
+                        'status' => $up->status,
                         'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
                         'payments' => $up->payments()->latest()->get()->
                             map(function ($payment) {
@@ -111,8 +160,6 @@ class AdminController extends Controller
         $role = $request->role;
 
         $users = User::query()
-            ->where('role', '!=', 'admin')
-
             // 🔍 SEARCH (DB LEVEL)
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -237,5 +284,47 @@ class AdminController extends Controller
     public function settings()
     {
         return Inertia::render('admin/settings');
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'required|max:20|unique:users,phone,' . $id,
+            'role' => 'required|in:admin,user,member',
+            'status' => 'required|in:active,inactive',
+            'gender' => 'nullable|in:male,female,other',
+            'address' => 'nullable|string|max:500',
+            'date_of_birth' => 'nullable|date',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update($request->only([
+            'name',
+            'email',
+            'phone',
+            'role',
+            'status',
+            'gender',
+            'address',
+            'date_of_birth'
+        ]));
+
+        return redirect()->back()->with('success', 'User updated successfully');
+    }
+
+    public function updateUserPassword(Request $request, $id)
+    {
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->back()->with('success', 'Password updated successfully');
     }
 }

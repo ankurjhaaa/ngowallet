@@ -160,7 +160,7 @@ export default function Profile() {
 
                         {/* OPTIONAL CTA (future use) */}
 
-                        <button className="mt-4 px-4 py-2 text-sm rounded-md bg-red-800 text-white">
+                        <button className="mt-4 px-4 py-2 text-sm rounded-md bg-emerald-800 text-white hover:bg-emerald-700 transition">
                             Contact Us
                         </button>
 
@@ -305,7 +305,7 @@ function EditProfileModal({ user, onClose }) {
                             onChange={e => setData("gender", e.target.value)}
                             className="w-full h-11 mt-1 rounded-md bg-gray-50 px-4
                            border border-gray-200 text-sm
-                           focus:ring-2 focus:ring-red-200 border-outline-none"
+                           focus:ring-2 focus:ring-emerald-200 focus:outline-none"
                         >
                             <option value="">Select gender</option>
                             <option value="male">Male</option>
@@ -321,7 +321,7 @@ function EditProfileModal({ user, onClose }) {
                         value={data.date_of_birth}
                         onChange={e => setData("date_of_birth", e.target.value)}
                         error={errors.date_of_birth}
-                        
+
                     />
 
                     <div>
@@ -330,7 +330,7 @@ function EditProfileModal({ user, onClose }) {
                             value={data.address}
                             onChange={e => setData("address", e.target.value)}
                             rows="3"
-                            className="w-full mt-1 rounded-md bg-gray-50 px-4 py-2 border focus:ring-2 focus:ring-red-200 border-gray-200"
+                            className="w-full mt-1 rounded-md bg-gray-50 px-4 py-2 border focus:ring-2 focus:ring-emerald-200 border-gray-200 focus:outline-none"
                         />
                         {errors.address && <Error text={errors.address} />}
                     </div>
@@ -346,7 +346,7 @@ function EditProfileModal({ user, onClose }) {
                         </button>
                         <button
                             disabled={processing}
-                            className="flex-1 h-11 rounded-md bg-red-800 text-white disabled:opacity-60"
+                            className="flex-1 h-11 rounded-md bg-emerald-800 text-white disabled:opacity-60 hover:bg-emerald-700 transition"
                         >
                             Save Changes
                         </button>
@@ -374,7 +374,7 @@ function Input({ label, ...props }) {
                 {...props}
                 className="w-full h-11 mt-1 rounded-md bg-gray-50 px-4
                            border border-gray-200 text-sm
-                           focus:ring-2 focus:ring-red-200 border-outline-none"
+                           focus:ring-2 focus:ring-emerald-200 focus:outline-none"
             />
         </div>
     );

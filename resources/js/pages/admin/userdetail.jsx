@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AdminLayout from "@/layouts/AdminLayout";
-import { useForm, usePage } from "@inertiajs/react";
+import { useForm, usePage, router } from "@inertiajs/react";
 
 export default function UserDetail() {
 
@@ -11,8 +11,9 @@ export default function UserDetail() {
         payments = [],
         stats = { payingAmount: 0, lifetimePaid: 0 },
         ngo_plans = [],
-        due_plan = [],
+        user_plans = [],
     } = usePage().props;
+
     const formatDate = (date) => {
         if (!date) return "-";
         return new Date(date).toLocaleDateString("en-IN", {
@@ -22,13 +23,17 @@ export default function UserDetail() {
         });
     };
 
-    /* ================= FALLBACKS ================= */
+    /* ================= STATE ================= */
     const payingAmount = stats.payingAmount ?? 0;
     const lifetimePaid = stats.lifetimePaid ?? 0;
     const [showUserDetails, setShowUserDetails] = useState(false);
-
-    const totalDeu = payingAmount - lifetimePaid;
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
     const [openPayments, setOpenPayments] = useState({});
+    const [showPlanModal, setShowPlanModal] = useState(false);
+
+    // Only sum up positive due amounts. Over-payments (negative dues) are ignored.
+    const totalDeu = user_plans.reduce((acc, up) => acc + Math.max(0, up.due_amount), 0);
 
     const togglePayments = (planId) => {
         setOpenPayments(prev => ({
@@ -37,312 +42,337 @@ export default function UserDetail() {
         }));
     };
 
-
-    const [showPlanModal, setShowPlanModal] = useState(false);
-
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, post, processing, reset } = useForm({
         amount: "",
         plan_id: "",
     });
+
     const addMoney = (e) => {
         e.preventDefault();
         if (!data.plan_id || !data.amount) return;
 
         post(`/admin/add-payment/${user.id}`, {
-            amount: data.amount,
-            plan_id: data.plan_id,
+            onSuccess: () => reset(),
         });
-        reset();
     }
+
     return (
         <AdminLayout>
-
-            {/* ================= USER HEADER ================= */}
-            <div className="bg-white rounded-md p-6 mb-4">
-                <div className="flex justify-between items-start">
+            <div className="max-w-full overflow-hidden px-1 min-w-0">
+                {/* ================= HEADER SECTION ================= */}
+                <div className="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-900">
-                            {user.name}
-                        </h1>
-                        <p className="text-sm text-gray-500">
-                            {user.phone ?? "—"}
-                            <br />
-                            Joined{" "}
-                            {new Date(user.created_at).toLocaleDateString("en-GB", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                            })}
-                        </p>
+                        <h1 className="text-xl font-bold text-gray-900 leading-tight">User Dashboard</h1>
+                        <p className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5">Profile & commitments for {user.name}</p>
                     </div>
-
-                    <div className="flex items-center gap-3">
-                        <StatusBadge status={user.status ?? "active"} />
-
-                        {/* TOGGLE BUTTON */}
+                    <div className="flex gap-2">
                         <button
-                            onClick={() => setShowUserDetails(!showUserDetails)}
-                            className="text-gray-500 hover:text-gray-700"
-                            title="View details"
+                            onClick={() => setShowEditModal(true)}
+                            className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-lg bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm"
                         >
-                            {showUserDetails ? (
-                                <i className="fa-solid fa-chevron-up text-sm"></i>
-                            ) : (
-                                <i className="fa-solid fa-chevron-down text-sm"></i>
-                            )}
+                            <i className="fas fa-user-edit text-red-700"></i>
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => setShowPasswordModal(true)}
+                            className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-lg bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm"
+                        >
+                            <i className="fas fa-shield-alt text-amber-600"></i>
+                            Security
                         </button>
                     </div>
                 </div>
-            </div>
-            {showUserDetails && (
-                <div className="bg-white rounded-md p-6 mb-8 border border-gray-100">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-4">
-                        User Details
-                    </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                {/* ================= SUMMARY STATS ================= */}
+                <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                    <div className="bg-red-800 rounded-lg p-4 text-white shadow-lg shadow-red-900/10 relative overflow-hidden group">
+                        <div className="absolute -right-2 -top-2 w-16 h-16 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
+                        <p className="text-red-100/70 text-[9px] sm:text-[10px] font-bold tracking-wider uppercase mb-0.5">Lifetime Contribution</p>
+                        <h3 className="text-xl sm:text-2xl font-black">₹{lifetimePaid.toLocaleString()}</h3>
+                        <div className="mt-2 flex items-center gap-2 text-red-200 text-[9px] font-medium">
+                            <span className="w-4 h-4 rounded-full bg-red-700 flex items-center justify-center text-[8px]">
+                                <i className="fas fa-check"></i>
+                            </span>
+                            Verified
+                        </div>
+                    </div>
 
-                        <Detail label="Email" value={user.email} />
-                        <Detail label="Phone" value={user.phone} />
-                        <Detail label="Role" value={user.role} />
-                        <Detail label="Status" value={user.status} />
-                        <Detail
-                            label="Date of Birth"
-                            value={
-                                user.date_of_birth
-                                    ? new Date(user.date_of_birth).toLocaleDateString("en-GB")
-                                    : "—"
-                            }
-                        />
-                        <Detail label="Gender" value={user.gender} />
-                        <Detail label="Email Verified"
-                            value={user.email_verified_at ? "Yes" : "No"}
-                        />
+                    <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-md relative overflow-hidden group">
+                        <div className="absolute -right-2 -top-2 w-16 h-16 bg-gray-50 rounded-full blur-xl group-hover:scale-150 transition-transform duration-500"></div>
+                        <p className="text-gray-400 text-[9px] sm:text-[10px] font-bold tracking-wider uppercase mb-0.5">
+                            Pending Amount
+                        </p>
+                        <h3 className={`text-xl sm:text-2xl font-black ${totalDeu > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                            ₹{totalDeu.toLocaleString()}
+                        </h3>
+                        <div className="mt-2 flex items-center gap-2 text-[9px] font-medium">
+                            {totalDeu > 0 ? (
+                                <div className="flex items-center gap-2 text-red-400">
+                                    <span className="w-4 h-4 rounded-full bg-red-50 flex items-center justify-center text-red-600 text-[8px]">
+                                        <i className="fas fa-clock"></i>
+                                    </span>
+                                    Due
+                                </div>
+                            ) : (
+                                <div className="flex items-center gap-2 text-emerald-600">
+                                    <span className="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 text-[8px]">
+                                        <i className="fas fa-check"></i>
+                                    </span>
+                                    Settled
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-                        <div className="sm:col-span-2 lg:col-span-3">
-                            <Detail label="Address" value={user.address} />
+
+                </div>
+
+                {/* ================= USER PROFILE (COLLAPSIBLE) ================= */}
+                <div className="bg-white rounded-lg border border-gray-100 shadow-sm mb-6 overflow-hidden transition-all duration-300">
+                    <button
+                        onClick={() => setShowUserDetails(!showUserDetails)}
+                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition group"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-red-100 text-red-800 flex items-center justify-center font-bold text-xs shrink-0">
+                                {user.name?.charAt(0)?.toUpperCase()}
+                            </div>
+                            <div className="text-left overflow-hidden">
+                                <p className="text-xs font-bold text-gray-900 truncate">{user.name}</p>
+                                <p className="text-[10px] text-gray-500 font-medium tracking-tight truncate">{user.phone}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-gray-400 group-hover:text-red-700 transition shrink-0">
+                            <span className="text-[9px] font-bold uppercase tracking-widest hidden xs:inline">
+                                {showUserDetails ? 'Hide' : 'More'}
+                            </span>
+                            <i className={`fas fa-chevron-down text-[10px] transition-transform duration-300 ${showUserDetails ? 'rotate-180' : ''}`}></i>
+                        </div>
+                    </button>
+
+                    <div className={`transition-all duration-300 ease-in-out ${showUserDetails ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
+                        <div className="px-4 pb-4 pt-1 grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 border-t border-gray-50 bg-gray-50/20">
+                            <Info label="Email" value={user.email} icon="fa-envelope" />
+                            <Info label="Role" value={user.role} icon="fa-user-tag" />
+                            <Info label="Gender" value={user.gender} icon="fa-venus-mars" />
+                            <Info label="DOB" value={user.date_of_birth ? formatDate(user.date_of_birth) : '—'} icon="fa-birthday-cake" />
+                            <div className="xs:col-span-2 md:col-span-4">
+                                <Info label="Address" value={user.address} icon="fa-map-marker-alt" />
+                            </div>
                         </div>
                     </div>
                 </div>
-            )}
 
-
-            {/* ================= YEAR SUMMARY ================= */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-                <Stat title="Total Due" value={`₹${totalDeu}`} />
-                <Stat title="Lifetime Paid" value={`₹${lifetimePaid}`} />
-            </div>
-
-
-
-            {/* ================= ACTIVE PLAN ================= */}
-            <div className="bg-white rounded-md p-6 mb-8">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold">
-                        Active Plan
-                    </h2>
-
-                    <button
-                        onClick={() => setShowPlanModal(true)}
-                        className="h-9 px-4 rounded-md bg-red-800 text-white text-sm hover:bg-red-700"
-                    >
-                        Add Plan
-                    </button>
-                </div>
-
-                {due_plan && due_plan.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {due_plan.map((plan) => (
-                            <div
-                                key={plan.id}
-                                className="bg-white rounded-md p-4 border border-red-200"
-                            >
-                                {/* HEADER */}
-                                <div className="flex items-center justify-between mb-2">
-                                    <h3 className="text-sm font-semibold text-gray-900 truncate">
-                                        {plan.name}
-                                    </h3>
-                                    <span className="text-[11px] px-2 py-0.5 rounded bg-red-100 text-red-700">
-                                        Due
-                                    </span>
-                                </div>
-
-                                {/* AMOUNTS */}
-                                <div className="grid grid-cols-2 gap-3 mb-2">
-                                    <div>
-                                        <p className="text-[11px] text-gray-500">
-                                            Yearly
-                                        </p>
-                                        <p className="text-sm font-semibold text-gray-900">
-                                            ₹{plan.yearly_amount}
-                                        </p>
-                                    </div>
-
-                                    <div className="text-right">
-                                        <p className="text-base font-bold text-red-800">
-                                            ₹{plan.due_amount}
-                                        </p>
-                                        <p className="text-[11px] text-gray-500">
-                                            Pending
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* DATE RANGE */}
-                                <p className="text-[12px] text-gray-500">
-                                    {formatDate(plan.start_date)} – {formatDate(plan.end_date)}
-                                </p>
-                                <div className="bg-white rounded-md mt-2">
-
-                                    <div className="w-full bg-gray-200 h-1 rounded-full">
-                                        <div
-                                            className="bg-red-800 h-1 rounded-full"
-                                            style={{ width: `${plan.percentage_paid}%` }}
-                                        />
-                                    </div>
-                                    <p className="text-xs text-gray-500">
-                                        {plan.percentage_paid}% completed
-                                    </p>
-                                </div>
-                                <div className="mt-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => togglePayments(plan.id)}
-                                        className="text-xs text-red-800 font-medium hover:underline "
-                                    >
-                                        {openPayments[plan.id] ? "Hide payments" : "View payments"}
-                                    </button>
-
-                                    {openPayments[plan.id] && (
-                                        <div className="mt-2 bg-gray-50 rounded-md p-3 ">
-                                            <h4 className="text-xs font-semibold text-gray-900 mb-2">
-                                                Payment History
-                                            </h4>
-
-                                            {plan.payments && plan.payments.length > 0 ? (
-                                                <ul className="text-xs text-gray-600 space-y-1">
-                                                    {plan.payments.map((payment, index) => (
-                                                        <li
-                                                            key={index}
-                                                            className="flex justify-between"
-                                                        >
-                                                            <span>
-                                                                ₹{payment.amount} via {payment.payment_mode}
-                                                            </span>
-                                                            <span className="text-gray-500">
-                                                                {formatDate(payment.payment_date)}
-                                                            </span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p className="text-xs text-gray-500">
-                                                    No payments recorded
-                                                </p>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-sm text-gray-500">
-                        No active due plan for this user
-                    </p>
-                )}
-
-            </div>
-
-            {showPlanModal && (
-                <PlanModal onClose={() => setShowPlanModal(false)} plans={ngo_plans} user_id={user.id} />
-            )}
-
-            {/* ================= ADMIN ADD PAYMENT (DESIGN ONLY) ================= */}
-            <div className="bg-white rounded-md p-6 mb-8">
-                <h2 className="text-lg font-semibold mb-4 text-red-800">
-                    Add Payment (Admin)
-                </h2>
-
-                <form action="" onSubmit={addMoney}>
-                    <div className="grid md:grid-cols-4 gap-4">
-
-                        <select
-                            value={data.plan_id}
-                            onChange={(e) => setData("plan_id", e.target.value)}
-                            className="h-11 rounded-md bg-gray-50 px-4 text-sm
-               focus:outline-none focus:ring-2 focus:ring-red-200 border border-red-200"
-                        >
-                            {due_plan && due_plan.length > 0 ? (
-                                <>
-                                    <option value="">Select Due Plan</option>
-                                    {due_plan.map((plan) => (
-                                        <option key={plan.id} value={plan.id}>
-                                            {plan.name} {plan.due_amount > 0 ? `- ₹${plan.due_amount} pending` : "- No Due"}
-                                        </option>
-                                    ))}
-                                </>
-                            ) : (
-                                <option value="">No Due Plans</option>
-                            )}
-
-                        </select>
-                        <input
-                            value={data.amount}
-                            onChange={(e) => setData("amount", e.target.value)}
-                            disabled={!data.plan_id}
-                            placeholder="Amount (₹)"
-                            type="number"
-                            className={`h-11 rounded-md bg-gray-50 px-4 text-sm focus:ring-2 focus:ring-red-200 border border-red-200`}
-                        />
-
+                {/* ================= CONTRIBUTION TIMELINE ================= */}
+                <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-sm sm:text-base font-bold text-gray-900 flex items-center gap-2">
+                            <i className="fas fa-history text-red-800"></i>
+                            Commitment Timeline
+                        </h2>
                         <button
-                            disabled={!data.plan_id || !data.amount}
-                            className="md:col-span-2 h-11 bg-red-800 text-white rounded-md text-sm cursor-pointer hover:bg-red-900 disabled:bg-gray-300 disabled:text-gray-600"
+                            onClick={() => setShowPlanModal(true)}
+                            className="h-7 px-3 rounded-lg bg-red-800 text-white text-[9px] font-bold hover:bg-red-700 transition shadow-md shadow-red-900/20"
                         >
-                            Add Payment
+                            Add Plan
                         </button>
                     </div>
 
-                </form>
+                    {user_plans && user_plans.length > 0 ? (
+                        <div className="relative max-w-full overflow-hidden">
+                            <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 no-scrollbar px-1 snap-x scroll-smooth">
+                                {user_plans.map((up) => (
+                                    <div
+                                        key={up.id}
+                                        className={`shrink-0 min-w-[260px] xs:min-w-[280px] sm:min-w-[300px] max-w-[85vw] bg-white rounded-lg p-4 border transition shadow-sm snap-start ${up.status === 'completed' ? 'border-emerald-100' : 'border-red-50'
+                                            }`}
+                                    >
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center gap-2 overflow-hidden">
+                                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${up.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-700'
+                                                    }`}>
+                                                    <i className={`fas ${up.status === 'completed' ? 'fa-medal' : 'fa-donate'} text-[10px]`}></i>
+                                                </div>
+                                                <div className="overflow-hidden">
+                                                    <h3 className="text-xs font-bold text-gray-900 truncate">{up.name}</h3>
+                                                    <p className="text-[8px] text-gray-400 font-bold uppercase tracking-tighter">
+                                                        {formatDate(up.start_date)} – {formatDate(up.end_date)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <StatusBadge status={up.status} />
+                                        </div>
 
+                                        <div className="grid grid-cols-2 gap-3 mb-4">
+                                            <div>
+                                                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Committed</p>
+                                                <p className="text-xs font-black text-gray-900">₹{up.yearly_amount.toLocaleString()}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest mb-0.5">Due</p>
+                                                <p className={`text-xs font-black ${up.due_amount > 0 ? 'text-red-700' : 'text-emerald-600'}`}>
+                                                    ₹{Math.max(0, up.due_amount).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mb-4">
+                                            <div className="flex items-center justify-between text-[9px] font-bold mb-1">
+                                                <span className="text-gray-400 uppercase">Progress</span>
+                                                <span className="text-gray-900">{up.percentage_paid}%</span>
+                                            </div>
+                                            <div className="w-full bg-gray-100 h-1 rounded-full overflow-hidden">
+                                                <div
+                                                    className={`h-full transition-all duration-1000 ${up.status === 'completed' ? 'bg-emerald-500' : 'bg-red-700'
+                                                        }`}
+                                                    style={{ width: `${up.percentage_paid}%` }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-3 border-t border-gray-50">
+                                            <button
+                                                onClick={() => togglePayments(up.id)}
+                                                className="text-[9px] font-bold text-gray-400 hover:text-red-800 uppercase tracking-widest flex items-center gap-1.5 transition"
+                                            >
+                                                <i className={`fas ${openPayments[up.id] ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                                                {openPayments[up.id] ? "Hide Ledger" : "View Ledger"}
+                                            </button>
+                                        </div>
+
+                                        {openPayments[up.id] && (
+                                            <div className="mt-3 bg-gray-50/50 rounded-lg p-2 border border-gray-100 animate-in fade-in slide-in-from-top-1 duration-200">
+                                                {up.payments && up.payments.length > 0 ? (
+                                                    <div className="space-y-1.5 max-h-[100px] overflow-y-auto pr-1 text-[9px]">
+                                                        {up.payments.map((p, i) => (
+                                                            <div key={i} className="flex items-center justify-between bg-white px-2 py-1 rounded-md border border-gray-50 shadow-sm">
+                                                                <div className="flex items-center gap-1.5">
+                                                                    <span className="font-black text-gray-900">₹{p.amount}</span>
+                                                                    <span className="text-gray-400 font-medium uppercase">{p.payment_mode}</span>
+                                                                </div>
+                                                                <span className="text-gray-400 font-medium">{formatDate(p.payment_date)}</span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-[9px] text-center py-2 text-gray-400 italic">No payments yet.</p>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-white rounded-lg p-8 border border-dashed border-gray-200 text-center">
+                            <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 mx-auto mb-3">
+                                <i className="fas fa-folder-open text-lg"></i>
+                            </div>
+                            <h3 className="text-[10px] text-gray-900 font-bold mb-1">No Active Commitments</h3>
+                            <p className="text-[9px] text-gray-500">Wait for commitment assignment.</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* ================= RECORD PAYMENT FORM ================= */}
+                <div className="bg-white rounded-lg p-4 border border-gray-100 shadow-sm mb-4">
+                    <h2 className="text-xs sm:text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i className="fas fa-plus-circle text-red-800"></i>
+                        Collect Payment
+                    </h2>
+
+                    <form onSubmit={addMoney}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-10 gap-3">
+                            <div className="lg:col-span-4">
+                                <label className="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">Target Plan</label>
+                                <select
+                                    value={data.plan_id}
+                                    onChange={(e) => setData("plan_id", e.target.value)}
+                                    className="w-full h-9 rounded-lg bg-gray-50 border border-gray-100 text-[10px] font-semibold focus:ring-red-500 focus:border-red-500 transition"
+                                >
+                                    <option value="">Select a commitment</option>
+                                    {user_plans.map((up) => (
+                                        <option key={up.id} value={up.id}>
+                                            {up.name} {up.due_amount > 0 ? `(₹${up.due_amount} due)` : `(Fulfilled)`}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="lg:col-span-3">
+                                <label className="block text-[8px] font-bold text-gray-400 uppercase tracking-widest mb-1 ml-1">Paid Amount (₹)</label>
+                                <input
+                                    value={data.amount}
+                                    onChange={(e) => setData("amount", e.target.value)}
+                                    disabled={!data.plan_id}
+                                    placeholder="0.00"
+                                    type="number"
+                                    className="w-full h-9 rounded-lg bg-gray-50 border border-gray-100 text-[10px] font-black focus:ring-red-500 focus:border-red-500 transition disabled:opacity-50 px-3"
+                                />
+                            </div>
+
+                            <div className="lg:col-span-3">
+                                <label className="hidden sm:block text-[8px] font-bold text-transparent mb-1 opacity-0 pointer-events-none">Submit</label>
+                                <button
+                                    disabled={!data.plan_id || !data.amount || processing}
+                                    className="w-full h-9 bg-red-800 border border-red-800 text-white rounded-lg text-[10px] font-bold hover:bg-red-900 disabled:bg-gray-100 disabled:text-gray-400 transition shadow-lg shadow-red-900/10"
+                                >
+                                    <i className="fas fa-file-invoice-dollar mr-2"></i>
+                                    Save Log
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
+
+            {/* Modals remain mostly the same but could use minor styling tweaks to match the new theme */}
+            {showPlanModal && <PlanModal onClose={() => setShowPlanModal(false)} plans={ngo_plans} user_id={user.id} />}
+            {showEditModal && <EditUserModal user={user} onClose={() => setShowEditModal(false)} />}
+            {showPasswordModal && <ChangePasswordModal userId={user.id} onClose={() => setShowPasswordModal(false)} />}
+
         </AdminLayout>
     );
 }
 
-/* ================= SMALL COMPONENTS ================= */
+/* ================= REFINED SMALL COMPONENTS ================= */
 
-function Stat({ title, value }) {
+function Info({ label, value, icon }) {
     return (
-        <div className="bg-white rounded-md p-5">
-            <p className="text-xs text-gray-500">{title}</p>
-            <p className="text-lg font-semibold mt-1 text-gray-900">{value}</p>
-        </div>
-    );
-}
-
-function Info({ label, value }) {
-    return (
-        <div>
-            <p className="text-xs text-gray-500">{label}</p>
-            <p className="text-sm font-medium mt-1">{value}</p>
+        <div className="flex gap-2">
+            <div className="w-7 h-7 rounded-lg bg-white border border-gray-100 shadow-sm flex items-center justify-center text-gray-400 shrink-0">
+                <i className={`fas ${icon} text-[10px]`}></i>
+            </div>
+            <div>
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">{label}</p>
+                <p className="text-[11px] font-bold text-gray-800 break-all leading-tight">{value ?? "—"}</p>
+            </div>
         </div>
     );
 }
 
 function StatusBadge({ status }) {
+    if (status === 'completed') {
+        return (
+            <span className="px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-full bg-emerald-100 text-emerald-700 flex items-center gap-1 shrink-0">
+                <span className="w-1 h-1 rounded-full bg-emerald-700 animate-pulse"></span>
+                Done
+            </span>
+        );
+    }
     return (
-        <span className="px-3 py-1 text-xs rounded-md bg-green-100 text-green-700">
-            {status}
+        <span className="px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded-full bg-red-100 text-red-700 flex items-center gap-1 shrink-0">
+            <span className="w-1 h-1 rounded-full bg-red-700 animate-pulse"></span>
+            Due
         </span>
     );
 }
 
+/* ================= MODAL COMPONENTS ================= */
+
 function PlanModal({ onClose, plans, user_id }) {
 
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         plan_id: "",
     });
 
@@ -352,9 +382,11 @@ function PlanModal({ onClose, plans, user_id }) {
         e.preventDefault();
 
         post(`/admin/assign-plan/${data.plan_id}/${user_id}`, {
-            onSuccess: () => onClose(),
+            onSuccess: () => {
+                reset();
+                onClose();
+            },
         });
-        reset();
 
     };
 
@@ -440,6 +472,231 @@ function Detail({ label, value }) {
             <p className="font-medium text-gray-900 mt-1">
                 {value ?? "—"}
             </p>
+        </div>
+    );
+}
+
+/* ================= EDIT USER MODAL ================= */
+
+function EditUserModal({ user, onClose }) {
+    const { data, setData, put, processing, errors } = useForm({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        role: user.role || "user",
+        status: user.status || "active",
+        gender: user.gender || "",
+        address: user.address || "",
+        date_of_birth: user.date_of_birth || "",
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        put(`/admin/user/${user.id}`, {
+            onSuccess: () => onClose(),
+        });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-md w-full max-w-xl max-h-[90vh] overflow-y-auto p-6">
+
+                <div className="flex justify-between items-center mb-5">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        Edit User
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+
+                <form onSubmit={submit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                    {/* NAME */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Name</label>
+                        <input
+                            type="text"
+                            value={data.name}
+                            onChange={e => setData("name", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                        {errors.name && <p className="text-xs text-red-700 mt-1">{errors.name}</p>}
+                    </div>
+
+                    {/* EMAIL */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+                        <input
+                            type="email"
+                            value={data.email}
+                            onChange={e => setData("email", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                        {errors.email && <p className="text-xs text-red-700 mt-1">{errors.email}</p>}
+                    </div>
+
+                    {/* PHONE */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+                        <input
+                            type="text"
+                            value={data.phone}
+                            onChange={e => setData("phone", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                        {errors.phone && <p className="text-xs text-red-700 mt-1">{errors.phone}</p>}
+                    </div>
+
+                    {/* ROLE */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Role</label>
+                        <select
+                            value={data.role}
+                            onChange={e => setData("role", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        >
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                            <option value="member">Member</option>
+                        </select>
+                        {errors.role && <p className="text-xs text-red-700 mt-1">{errors.role}</p>}
+                    </div>
+
+                    {/* STATUS */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
+                        <select
+                            value={data.status}
+                            onChange={e => setData("status", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                        {errors.status && <p className="text-xs text-red-700 mt-1">{errors.status}</p>}
+                    </div>
+
+                    {/* GENDER */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Gender</label>
+                        <select
+                            value={data.gender}
+                            onChange={e => setData("gender", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        >
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    {/* DATE OF BIRTH */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Date of Birth</label>
+                        <input
+                            type="date"
+                            value={data.date_of_birth}
+                            onChange={e => setData("date_of_birth", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                    </div>
+
+                    {/* ADDRESS */}
+                    <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Address</label>
+                        <textarea
+                            rows="2"
+                            value={data.address}
+                            onChange={e => setData("address", e.target.value)}
+                            className="w-full px-3 py-2 rounded-md border border-gray-300 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                    </div>
+
+                    {/* ACTIONS */}
+                    <div className="sm:col-span-2 flex gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="flex-1 h-10 rounded-md bg-gray-200 text-sm text-gray-700">
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="flex-1 h-10 rounded-md bg-red-800 text-white text-sm disabled:opacity-60"
+                        >
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+}
+
+/* ================= CHANGE PASSWORD MODAL ================= */
+
+function ChangePasswordModal({ userId, onClose }) {
+    const { data, setData, put, processing, errors } = useForm({
+        password: "",
+        password_confirmation: "",
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+        put(`/admin/user/${userId}/password`, {
+            onSuccess: () => onClose(),
+        });
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-md w-full max-w-md p-6">
+
+                <div className="flex justify-between items-center mb-5">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        Change Password
+                    </h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+                </div>
+
+                <form onSubmit={submit} className="space-y-4">
+
+                    {/* NEW PASSWORD */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">New Password</label>
+                        <input
+                            type="password"
+                            value={data.password}
+                            onChange={e => setData("password", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                        {errors.password && <p className="text-xs text-red-700 mt-1">{errors.password}</p>}
+                    </div>
+
+                    {/* CONFIRM PASSWORD */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Confirm Password</label>
+                        <input
+                            type="password"
+                            value={data.password_confirmation}
+                            onChange={e => setData("password_confirmation", e.target.value)}
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                    </div>
+
+                    {/* ACTIONS */}
+                    <div className="flex gap-3 pt-2">
+                        <button type="button" onClick={onClose} className="flex-1 h-10 rounded-md bg-gray-200 text-sm text-gray-700">
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="flex-1 h-10 rounded-md bg-red-800 text-white text-sm disabled:opacity-60"
+                        >
+                            Update Password
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 }
