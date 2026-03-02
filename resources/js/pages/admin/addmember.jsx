@@ -5,6 +5,7 @@ export default function AddMember() {
 
     const { data, setData, post, processing, errors } = useForm({
         name: "",
+        nickname: "",
         email: "",
         phone: "",
         role: "user",
@@ -22,13 +23,28 @@ export default function AddMember() {
         <AdminLayout>
 
             {/* ================= HEADER ================= */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    Add New Member
-                </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Create a new user or member account
-                </p>
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                        Add New Member
+                    </h1>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        Create a new user or member account
+                    </p>
+                </div>
+                <Link
+                    href="/admin/users"
+                    className="
+                        inline-flex items-center justify-center gap-2
+                        h-9 px-4 rounded-lg text-sm
+                        text-gray-600 border border-gray-200
+                        hover:bg-gray-50 transition
+                        w-full sm:w-auto
+                    "
+                >
+                    <i className="fas fa-arrow-left text-xs"></i>
+                    Back to Users
+                </Link>
             </div>
 
             {/* ================= FORM ================= */}
@@ -46,6 +62,19 @@ export default function AddMember() {
                             className="form-input"
                         />
                         {errors.name && <p className="error">{errors.name}</p>}
+                    </div>
+
+                    {/* NICKNAME */}
+                    <div>
+                        <label className="form-label">Nickname</label>
+                        <input
+                            type="text"
+                            value={data.nickname}
+                            onChange={e => setData("nickname", e.target.value)}
+                            placeholder="Optional"
+                            className="form-input"
+                        />
+                        {errors.nickname && <p className="error">{errors.nickname}</p>}
                     </div>
 
                     {/* EMAIL */}
@@ -129,12 +158,12 @@ export default function AddMember() {
                     </div>
 
                     {/* ACTIONS */}
-                    <div className="md:col-span-2 flex gap-3 pt-2">
+                    <div className="md:col-span-2 flex flex-col sm:flex-row gap-3 pt-2">
                         <button
                             type="submit"
                             disabled={processing}
                             className="
-                                px-6 py-2.5 rounded-md text-sm font-medium
+                                w-full sm:w-auto px-6 py-2.5 rounded-md text-sm font-medium
                                 bg-red-800 text-white
                                 hover:bg-red-900 transition
                                 disabled:opacity-60
@@ -144,10 +173,12 @@ export default function AddMember() {
                         </button>
 
                         <Link
-                            href="/admin/dashboard"
+                            href="/admin/users"
                             className="
+                                w-full sm:w-auto text-center
                                 px-6 py-2.5 rounded-md text-sm
                                 text-gray-600 hover:bg-gray-50 transition
+                                border border-gray-200
                             "
                         >
                             Cancel

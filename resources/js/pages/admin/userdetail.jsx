@@ -12,6 +12,7 @@ export default function UserDetail() {
         stats = { payingAmount: 0, lifetimePaid: 0 },
         ngo_plans = [],
         user_plans = [],
+        due_plans =[],
     } = usePage().props;
 
     const formatDate = (date) => {
@@ -58,12 +59,18 @@ export default function UserDetail() {
 
     return (
         <AdminLayout>
-            <div className="max-w-full overflow-hidden px-1 min-w-0">
-                {/* ================= HEADER SECTION ================= */}
+            <div className="w-full min-w-0 overflow-x-hidden px-1">
+                {/* ================= BREADCRUMB + HEADER SECTION ================= */}
+                <div className="mb-2">
+                    <a href="/admin/users" className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-400 hover:text-red-700 transition font-medium">
+                        <i className="fas fa-arrow-left text-[8px]"></i>
+                        Back to Users
+                    </a>
+                </div>
                 <div className="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
                     <div>
                         <h1 className="text-xl font-bold text-gray-900 leading-tight">User Dashboard</h1>
-                        <p className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5">Profile & commitments for {user.name}</p>
+                        <p className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5">Profile & commitments for {user.name}{user.nickname ? ` (${user.nickname})` : ''}</p>
                     </div>
                     <div className="flex gap-2">
                         <button
@@ -138,7 +145,10 @@ export default function UserDetail() {
                                 {user.name?.charAt(0)?.toUpperCase()}
                             </div>
                             <div className="text-left overflow-hidden">
-                                <p className="text-xs font-bold text-gray-900 truncate">{user.name}</p>
+                                <p className="text-xs font-bold text-gray-900 truncate">
+                                    {user.name}
+                                    {user.nickname && <span className="text-gray-400 font-normal ml-1">({user.nickname})</span>}
+                                </p>
                                 <p className="text-[10px] text-gray-500 font-medium tracking-tight truncate">{user.phone}</p>
                             </div>
                         </div>
@@ -153,6 +163,7 @@ export default function UserDetail() {
                     <div className={`transition-all duration-300 ease-in-out ${showUserDetails ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'} overflow-hidden`}>
                         <div className="px-4 pb-4 pt-1 grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4 border-t border-gray-50 bg-gray-50/20">
                             <Info label="Email" value={user.email} icon="fa-envelope" />
+                            <Info label="Nickname" value={user.nickname} icon="fa-id-badge" />
                             <Info label="Role" value={user.role} icon="fa-user-tag" />
                             <Info label="Gender" value={user.gender} icon="fa-venus-mars" />
                             <Info label="DOB" value={user.date_of_birth ? formatDate(user.date_of_birth) : '—'} icon="fa-birthday-cake" />
@@ -179,12 +190,13 @@ export default function UserDetail() {
                     </div>
 
                     {user_plans && user_plans.length > 0 ? (
-                        <div className="relative max-w-full overflow-hidden">
-                            <div className="flex flex-nowrap overflow-x-auto pb-4 gap-3 no-scrollbar px-1 snap-x scroll-smooth">
+                        <div className="relative w-full min-w-0 max-w-full">
+                            <div className="w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 [scrollbar-width:none] [-ms-overflow-style:none] touch-pan-x">
+                                <div className="grid grid-flow-col auto-cols-[85vw] sm:auto-cols-[300px] gap-3 min-w-max px-1 pb-3 snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden">
                                 {user_plans.map((up) => (
                                     <div
                                         key={up.id}
-                                        className={`shrink-0 min-w-[260px] xs:min-w-[280px] sm:min-w-[300px] max-w-[85vw] bg-white rounded-lg p-4 border transition shadow-sm snap-start ${up.status === 'completed' ? 'border-emerald-100' : 'border-red-50'
+                                        className={`w-full max-w-[300px] bg-white rounded-lg p-4 border transition shadow-sm snap-start ${up.status === 'completed' ? 'border-emerald-100' : 'border-red-50'
                                             }`}
                                     >
                                         <div className="flex items-center justify-between mb-3">
@@ -245,12 +257,12 @@ export default function UserDetail() {
                                                 {up.payments && up.payments.length > 0 ? (
                                                     <div className="space-y-1.5 max-h-[100px] overflow-y-auto pr-1 text-[9px]">
                                                         {up.payments.map((p, i) => (
-                                                            <div key={i} className="flex items-center justify-between bg-white px-2 py-1 rounded-md border border-gray-50 shadow-sm">
-                                                                <div className="flex items-center gap-1.5">
-                                                                    <span className="font-black text-gray-900">₹{p.amount}</span>
-                                                                    <span className="text-gray-400 font-medium uppercase">{p.payment_mode}</span>
+                                                            <div key={i} className="flex items-center justify-between gap-2 bg-white px-2 py-1 rounded-md border border-gray-50 shadow-sm">
+                                                                <div className="flex items-center gap-1.5 min-w-0">
+                                                                    <span className="font-black text-gray-900 shrink-0">₹{p.amount}</span>
+                                                                    <span className="text-gray-400 font-medium uppercase truncate">{p.payment_mode}</span>
                                                                 </div>
-                                                                <span className="text-gray-400 font-medium">{formatDate(p.payment_date)}</span>
+                                                                <span className="text-gray-400 font-medium shrink-0">{formatDate(p.payment_date)}</span>
                                                             </div>
                                                         ))}
                                                     </div>
@@ -261,6 +273,7 @@ export default function UserDetail() {
                                         )}
                                     </div>
                                 ))}
+                                </div>
                             </div>
                         </div>
                     ) : (
@@ -291,7 +304,7 @@ export default function UserDetail() {
                                     className="w-full h-9 rounded-lg bg-gray-50 border border-gray-100 text-[10px] font-semibold focus:ring-red-500 focus:border-red-500 transition"
                                 >
                                     <option value="">Select a commitment</option>
-                                    {user_plans.map((up) => (
+                                    {due_plans.map((up) => (
                                         <option key={up.id} value={up.id}>
                                             {up.name} {up.due_amount > 0 ? `(₹${up.due_amount} due)` : `(Fulfilled)`}
                                         </option>
@@ -481,6 +494,7 @@ function Detail({ label, value }) {
 function EditUserModal({ user, onClose }) {
     const { data, setData, put, processing, errors } = useForm({
         name: user.name || "",
+        nickname: user.nickname || "",
         email: user.email || "",
         phone: user.phone || "",
         role: user.role || "user",
@@ -520,6 +534,19 @@ function EditUserModal({ user, onClose }) {
                             className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
                         />
                         {errors.name && <p className="text-xs text-red-700 mt-1">{errors.name}</p>}
+                    </div>
+
+                    {/* NICKNAME */}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Nickname</label>
+                        <input
+                            type="text"
+                            value={data.nickname}
+                            onChange={e => setData("nickname", e.target.value)}
+                            placeholder="Optional"
+                            className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                        />
+                        {errors.nickname && <p className="text-xs text-red-700 mt-1">{errors.nickname}</p>}
                     </div>
 
                     {/* EMAIL */}

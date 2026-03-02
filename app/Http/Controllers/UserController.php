@@ -64,6 +64,7 @@ class UserController extends Controller
                     'name' => $up->plan?->name,
                     'yearly_amount' => $up->yearly_amount,
                     'due_amount' => $up->dueAmount(),
+                    'pending_amount' => max(0,$up->dueAmount()),
                     'start_date' => $up->start_date,
                     'end_date' => $up->end_date,
                     'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,

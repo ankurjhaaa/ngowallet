@@ -33,13 +33,29 @@ export default function Users() {
         <AdminLayout>
 
             {/* HEADER */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    Users
-                </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Showing {users.total} users
-                </p>
+            <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                        Users
+                    </h1>
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        Showing {users.total} users
+                    </p>
+                </div>
+                <Link
+                    href="/admin/add-member-page"
+                    className="
+                        inline-flex items-center justify-center gap-2
+                        h-10 px-5 rounded-lg
+                        bg-red-800 text-white text-sm font-medium
+                        hover:bg-red-900 transition
+                        shadow-md shadow-red-900/15
+                        w-full sm:w-auto
+                    "
+                >
+                    <i className="fas fa-user-plus text-xs"></i>
+                    Add Member
+                </Link>
             </div>
 
             {/* FILTER BAR */}
@@ -83,13 +99,16 @@ export default function Users() {
                     <table className="w-full text-sm">
                         <thead className="bg-gray-50 text-gray-600">
                             <tr>
-                                <th className="px-6 py-4 text-left font-medium">
+                                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-medium text-xs sm:text-sm">
                                     User
                                 </th>
-                                <th className="px-6 py-4 text-left font-medium">
+                                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-medium text-xs sm:text-sm hidden sm:table-cell">
+                                    Nickname
+                                </th>
+                                <th className="px-3 sm:px-6 py-3 sm:py-4 text-left font-medium text-xs sm:text-sm">
                                     Role
                                 </th>
-                                <th className="px-6 py-4 text-right font-medium">
+                                <th className="px-3 sm:px-6 py-3 sm:py-4 text-right font-medium text-xs sm:text-sm">
                                     Action
                                 </th>
                             </tr>
@@ -98,7 +117,7 @@ export default function Users() {
                         <tbody>
                             {users.data.length === 0 ? (
                                 <tr>
-                                    <td colSpan="3" className="py-12 text-center text-gray-500">
+                                    <td colSpan="4" className="py-12 text-center text-gray-500">
                                         No users found
                                     </td>
                                 </tr>
@@ -108,28 +127,46 @@ export default function Users() {
                                         key={user.id}
                                         className="hover:bg-red-50/40 transition"
                                     >
-                                        <td className="px-6 py-4">
-                                            <p className="font-medium text-gray-900">
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4">
+                                            <p className="font-medium text-gray-900 text-sm">
                                                 {user.name}
                                             </p>
                                             <p className="text-xs text-gray-500">
                                                 {user.phone}
                                             </p>
+                                            {/* Show nickname on mobile below name */}
+                                            {user.nickname && (
+                                                <p className="text-[10px] text-gray-400 sm:hidden">
+                                                    {user.nickname}
+                                                </p>
+                                            )}
                                         </td>
 
-                                        <td className="px-6 py-4 capitalize text-gray-700">
-                                            {user.role}
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-600 text-sm hidden sm:table-cell">
+                                            {user.nickname || "—"}
                                         </td>
 
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4 capitalize text-gray-700 text-xs sm:text-sm">
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium ${
+                                                user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+                                                user.role === 'member' ? 'bg-emerald-100 text-emerald-700' :
+                                                'bg-gray-100 text-gray-600'
+                                            }`}>
+                                                {user.role}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-3 sm:px-6 py-3 sm:py-4 text-right">
                                             <Link
                                                 href={`/admin/userdetail/${user.id}`}
                                                 className="
-                                                    text-sm text-red-700
+                                                    inline-flex items-center gap-1
+                                                    text-xs sm:text-sm text-red-700
                                                     hover:text-red-900
                                                     hover:underline underline-offset-4
                                                 "
                                             >
+                                                <i className="fas fa-eye text-[10px]"></i>
                                                 View
                                             </Link>
                                         </td>

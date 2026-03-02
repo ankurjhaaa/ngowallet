@@ -23,11 +23,11 @@ export default function Dashboard() {
         <AdminLayout>
 
             {/* ================= HEADER ================= */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-semibold text-gray-900">
+            <div className="mb-6 sm:mb-8">
+                <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
                     Dashboard Overview
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     Complete snapshot of NGO commitments & activities
                 </p>
             </div>

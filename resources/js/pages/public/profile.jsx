@@ -114,7 +114,7 @@ export default function Profile() {
                                 <Legend
                                     color="red"
                                     label="Pending"
-                                    value={activePlan.due_amount}
+                                    value={activePlan.pending_amount}
                                 />
                             </div>
                         </div>
@@ -129,7 +129,7 @@ export default function Profile() {
                             />
                             <Stat
                                 label="Pending"
-                                value={activePlan.due_amount}
+                                value={activePlan.pending_amount}
                                 color="red"
                             />
                         </div>

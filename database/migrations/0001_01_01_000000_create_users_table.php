@@ -13,6 +13,7 @@ return new class extends Migration {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('nickname')->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('phone')->unique()->nullable();
             $table->enum('role', ['admin', 'user', 'member'])->default('user');
@@ -30,7 +31,8 @@ return new class extends Migration {
         DB::table('users')->insert([
             [
                 'name' => 'Admin User',
-                'phone' => '1111111111',
+                'nickname' => 'Admin',
+                'phone' => '7763972896',
                 'password' => Hash::make('password'),
                 'role' => 'admin',
                 'created_at' => now(),
@@ -38,6 +40,7 @@ return new class extends Migration {
             ],
             [
                 'name' => 'Normal User',
+                'nickname' => 'Normal',
                 'phone' => '2222222222',
                 'password' => Hash::make('password'),
                 'role' => 'user',
@@ -46,6 +49,7 @@ return new class extends Migration {
             ],
             [
                 'name' => 'Member User',
+                'nickname' => 'Member',
                 'phone' => '3333333333',
                 'password' => Hash::make('password'),
                 'role' => 'member',

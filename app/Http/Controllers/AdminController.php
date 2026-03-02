@@ -147,6 +147,31 @@ class AdminController extends Controller
                                 ];
                             }),
                     ];
+                }),
+                'due_plans' => UserPlan::with('plan')
+                ->where('user_id', $id)
+                ->where('status', 'due')
+                ->latest()
+                ->get()
+                ->map(function ($up) {
+                    return [
+                        'id' => $up->id,
+                        'name' => $up->plan?->name,
+                        'yearly_amount' => $up->yearly_amount,
+                        'due_amount' => $up->dueAmount(),
+                        'start_date' => $up->start_date,
+                        'end_date' => $up->end_date,
+                        'status' => $up->status,
+                        'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
+                        'payments' => $up->payments()->latest()->get()->
+                            map(function ($payment) {
+                                return [
+                                    'amount' => $payment->amount,
+                                    'payment_date' => $payment->payment_date,
+                                    'payment_mode' => $payment->payment_mode,
+                                ];
+                            }),
+                    ];
                 })
         ]);
     }
@@ -260,6 +285,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'nickname' => 'nullable|string|max:255',
             'email' => 'nullable',
             'phone' => 'required|max:20|unique:users',
             'password' => 'required',
@@ -270,6 +296,7 @@ class AdminController extends Controller
 
         $user = User::create([
             'name' => $request->name,
+            'nickname' => $request->nickname,
             'email' => $request->email,
             'phone' => $request->phone,
             'gender' => $request->gender,
@@ -290,6 +317,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'nickname' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'required|max:20|unique:users,phone,' . $id,
             'role' => 'required|in:admin,user,member',
@@ -302,6 +330,7 @@ class AdminController extends Controller
         $user = User::findOrFail($id);
         $user->update($request->only([
             'name',
+            'nickname',
             'email',
             'phone',
             'role',

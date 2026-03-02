@@ -9,7 +9,7 @@ export default function AdminLayout({ children }) {
     const active = (path) => url.startsWith(path);
 
     return (
-        <div className="min-h-screen flex bg-[#f6f7fb]">
+        <div className="min-h-screen flex bg-[#f6f7fb] overflow-x-hidden">
 
             {/* ================= SIDEBAR ================= */}
             <aside
@@ -62,12 +62,12 @@ export default function AdminLayout({ children }) {
             </aside>
 
             {/* ================= MAIN ================= */}
-            <div className="flex-1 md:ml-64 flex flex-col">
+            <div className="flex-1 md:ml-64 flex flex-col min-w-0 w-full overflow-x-hidden">
 
                 {/* ================= TOPBAR ================= */}
                 <header className="
-                    sticky top-0 z-30 h-16
-                    bg-white flex items-center px-6
+                    fixed top-0 left-0 md:left-64 right-0 z-30 h-16
+                    bg-white flex items-center px-4 sm:px-6
                     shadow-[0_2px_10px_rgba(0,0,0,0.04)]
                 ">
                     <button
@@ -83,7 +83,7 @@ export default function AdminLayout({ children }) {
                 </header>
 
                 {/* ================= CONTENT ================= */}
-                <main className="flex-1 p-6 min-w-0">
+                <main className="flex-1 p-3 sm:p-6 mt-15 min-w-0">
                     {children}
                 </main>
             </div>

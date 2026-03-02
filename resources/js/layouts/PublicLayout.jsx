@@ -21,7 +21,7 @@ function LayoutInner({ children }) {
         <div className="min-h-screen bg-white flex flex-col" dir={isRtl ? "rtl" : "ltr"}>
 
             {/* ================= NAVBAR ================= */}
-            <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-emerald-100">
+            <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-emerald-100 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
                     {/* Logo */}
@@ -110,7 +110,7 @@ function LayoutInner({ children }) {
             </header>
 
             {/* ================= MAIN ================= */}
-            <main className="flex-1">{children}</main>
+            <main className="flex-1 pt-16">{children}</main>
 
             {/* ================= FOOTER (Desktop) ================= */}
             <footer className="hidden md:block bg-emerald-950 mt-16">
