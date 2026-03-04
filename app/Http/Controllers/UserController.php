@@ -6,6 +6,8 @@ use App\Models\Payment;
 use App\Models\Spend;
 use App\Models\User;
 use App\Models\UserPlan;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -105,5 +107,47 @@ class UserController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Profile updated successfully');
+    }
+
+    public function planPdf($planId)
+    {
+        $userPlan = UserPlan::with(['plan', 'payments', 'user'])
+            ->where('user_id', auth()->id())
+            ->where('id', $planId)
+            ->firstOrFail();
+
+        $payments = $userPlan->payments
+            ->sortByDesc('payment_date')
+            ->map(function ($payment) {
+                return [
+                    'amount' => $payment->amount,
+                    'payment_date' => $payment->payment_date ? Carbon::parse($payment->payment_date)->format('d M Y') : '-',
+                    'payment_mode' => $payment->payment_mode ?? '-',
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        $data = [
+            'org_name' => 'Bazm-e-Haidri',
+            'org_address' => 'NGO Address, City, State, India',
+            'org_phone' => '+91 90000 00000',
+            'org_email' => 'info@bazm-e-haidri.org',
+            'receipt_no' => 'BH-PLAN-' . $userPlan->id,
+            'user' => $userPlan->user,
+            'plan_name' => $userPlan->plan?->name ?? 'Plan',
+            'yearly_amount' => $userPlan->yearly_amount ?? 0,
+            'total_paid' => $userPlan->totalPaid(),
+            'due_amount' => max(0, $userPlan->dueAmount()),
+            'start_date' => $userPlan->start_date ? Carbon::parse($userPlan->start_date)->format('d M Y') : '-',
+            'end_date' => $userPlan->end_date ? Carbon::parse($userPlan->end_date)->format('d M Y') : '-',
+            'issued_date' => now()->format('d M Y'),
+            'payments' => $payments,
+        ];
+
+        $pdf = Pdf::loadView('pdf.plan-receipt', $data)->setPaper('a4');
+        $filename = 'plan-' . $userPlan->id . '-statement.pdf';
+
+        return $pdf->download($filename);
     }
 }

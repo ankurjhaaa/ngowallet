@@ -7,6 +7,9 @@ use App\Models\Plan;
 use App\Models\Spend;
 use App\Models\User;
 use App\Models\UserPlan;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -313,6 +316,113 @@ class AdminController extends Controller
         return Inertia::render('admin/settings');
     }
 
+    public function reports(Request $request)
+    {
+        $fromInput = $request->input('from');
+        $toInput = $request->input('to');
+
+        $from = $fromInput ? Carbon::parse($fromInput)->startOfDay() : now()->subMonths(5)->startOfMonth();
+        $to = $toInput ? Carbon::parse($toInput)->endOfDay() : now()->endOfMonth();
+
+        $role = $request->input('role', 'all');
+        $planId = $request->input('plan_id', 'all');
+        $paymentMode = $request->input('payment_mode', 'all');
+
+        $paymentsQuery = Payment::with(['user', 'userPlan.plan'])
+            ->when($from, fn ($q) => $q->whereDate('payment_date', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('payment_date', '<=', $to))
+            ->when($role && $role !== 'all', function ($q) use ($role) {
+                $q->whereHas('user', fn ($uq) => $uq->where('role', $role));
+            })
+            ->when($planId && $planId !== 'all', function ($q) use ($planId) {
+                $q->whereHas('userPlan', fn ($pq) => $pq->where('plan_id', $planId));
+            })
+            ->when($paymentMode && $paymentMode !== 'all', fn ($q) => $q->where('payment_mode', $paymentMode));
+
+        $payments = $paymentsQuery->get();
+
+        $expenses = Spend::query()
+            ->when($from, fn ($q) => $q->whereDate('date', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('date', '<=', $to))
+            ->get();
+
+        $period = CarbonPeriod::create($from->copy()->startOfMonth(), '1 month', $to->copy()->startOfMonth());
+        $labels = [];
+        $collectionSeries = [];
+        $expenseSeries = [];
+
+        $paymentsByMonth = $payments->groupBy(function ($p) {
+            return Carbon::parse($p->payment_date)->format('Y-m');
+        });
+        $expensesByMonth = $expenses->groupBy(function ($e) {
+            return Carbon::parse($e->date)->format('Y-m');
+        });
+
+        foreach ($period as $dt) {
+            $key = $dt->format('Y-m');
+            $labels[] = $dt->format('M Y');
+            $collectionSeries[] = $paymentsByMonth->get($key, collect())->sum('amount');
+            $expenseSeries[] = $expensesByMonth->get($key, collect())->sum('amount');
+        }
+
+        $planBreakdown = $payments
+            ->groupBy(fn ($p) => $p->userPlan?->plan?->name ?? 'Unknown')
+            ->map(fn ($items) => $items->sum('amount'))
+            ->sortDesc();
+
+        $monthlyTotals = $paymentsByMonth->map(fn ($items) => $items->sum('amount'));
+        $monthlyLabels = array_values($labels);
+        $monthlyValues = array_values($collectionSeries);
+
+        $topDonors = $payments
+            ->groupBy('user_id')
+            ->map(function ($items) {
+                $user = $items->first()->user;
+                return [
+                    'name' => $user?->name ?? 'Unknown',
+                    'total' => $items->sum('amount'),
+                    'count' => $items->count(),
+                ];
+            })
+            ->sortByDesc('total')
+            ->values()
+            ->take(5);
+
+        $kpis = [
+            'total_collection' => $payments->sum('amount'),
+            'total_expense' => $expenses->sum('amount'),
+            'net_balance' => $payments->sum('amount') - $expenses->sum('amount'),
+            'donor_count' => $payments->pluck('user_id')->unique()->count(),
+        ];
+
+        return Inertia::render('admin/reports', [
+            'filters' => [
+                'from' => $from->toDateString(),
+                'to' => $to->toDateString(),
+                'role' => $role,
+                'plan_id' => $planId,
+                'payment_mode' => $paymentMode,
+            ],
+            'plans' => Plan::select('id', 'name')->orderBy('name')->get(),
+            'payment_modes' => Payment::select('payment_mode')->distinct()->pluck('payment_mode'),
+            'charts' => [
+                'labels' => $labels,
+                'collections' => $collectionSeries,
+                'expenses' => $expenseSeries,
+            ],
+            'plan_breakdown' => [
+                'labels' => $planBreakdown->keys()->values(),
+                'values' => $planBreakdown->values(),
+            ],
+            'monthly_totals' => [
+                'labels' => $monthlyLabels,
+                'values' => $monthlyValues,
+            ],
+            'top_donors' => $topDonors,
+            'kpis' => $kpis,
+        ]);
+    }
+
     public function updateUser(Request $request, $id)
     {
         $request->validate([
@@ -355,5 +465,47 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Password updated successfully');
+    }
+
+    public function userPlanPdf($userId, $planId)
+    {
+        $userPlan = UserPlan::with(['plan', 'payments', 'user'])
+            ->where('user_id', $userId)
+            ->where('id', $planId)
+            ->firstOrFail();
+
+        $payments = $userPlan->payments
+            ->sortByDesc('payment_date')
+            ->map(function ($payment) {
+                return [
+                    'amount' => $payment->amount,
+                    'payment_date' => $payment->payment_date ? Carbon::parse($payment->payment_date)->format('d M Y') : '-',
+                    'payment_mode' => $payment->payment_mode ?? '-',
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        $data = [
+            'org_name' => 'Bazm-e-Haidri',
+            'org_address' => 'NGO Address, City, State, India',
+            'org_phone' => '+91 90000 00000',
+            'org_email' => 'info@bazm-e-haidri.org',
+            'receipt_no' => 'BH-PLAN-' . $userPlan->id,
+            'user' => $userPlan->user,
+            'plan_name' => $userPlan->plan?->name ?? 'Plan',
+            'yearly_amount' => $userPlan->yearly_amount ?? 0,
+            'total_paid' => $userPlan->totalPaid(),
+            'due_amount' => max(0, $userPlan->dueAmount()),
+            'start_date' => $userPlan->start_date ? Carbon::parse($userPlan->start_date)->format('d M Y') : '-',
+            'end_date' => $userPlan->end_date ? Carbon::parse($userPlan->end_date)->format('d M Y') : '-',
+            'issued_date' => now()->format('d M Y'),
+            'payments' => $payments,
+        ];
+
+        $pdf = Pdf::loadView('pdf.plan-receipt', $data)->setPaper('a4');
+        $filename = 'plan-' . $userPlan->id . '-statement.pdf';
+
+        return $pdf->download($filename);
     }
 }

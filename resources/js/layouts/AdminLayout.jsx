@@ -34,8 +34,8 @@ export default function AdminLayout({ children }) {
                     <SidebarLink href="/admin/users" label="Users" icon="fa-users" active={active("/admin/users")} />
                     <SidebarLink href="/admin/plans" label="Plans" icon="fa-clipboard-list" active={active("/admin/plans")} />
                     <SidebarLink href="/admin/expense" label="Expense" icon="fa-money-bill-wave" active={active("/admin/expense")} />
+                    <SidebarLink href="/admin/reports" label="Reports" icon="fa-chart-pie" active={active("/admin/reports")} />
                     <SidebarLink href="/admin/add-member-page" label="Add Member" icon="fa-user-plus" active={active("/admin/add-member-page")} />
-                    <SidebarLink href="/admin/programs" label="Programs" icon="fa-hand-holding-heart" active={active("/admin/programs")} />
                     <SidebarLink href="/admin/settings" label="Settings" icon="fa-cog" active={active("/admin/settings")} />
                 </nav>
 
@@ -83,7 +83,7 @@ export default function AdminLayout({ children }) {
                 </header>
 
                 {/* ================= CONTENT ================= */}
-                <main className="flex-1 p-3 sm:p-6 mt-15 min-w-0">
+                <main className="flex-1 p-3 sm:p-6 my-20 min-w-0">
                     {children}
                 </main>
             </div>

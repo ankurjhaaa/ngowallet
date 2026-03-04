@@ -75,14 +75,14 @@ export default function UserDetail() {
                     <div className="flex gap-2">
                         <button
                             onClick={() => setShowEditModal(true)}
-                            className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-lg bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm"
+                            className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-lg bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                         >
                             <i className="fas fa-user-edit text-red-700"></i>
                             Edit
                         </button>
                         <button
                             onClick={() => setShowPasswordModal(true)}
-                            className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-lg bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm"
+                            className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-lg bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                         >
                             <i className="fas fa-shield-alt text-amber-600"></i>
                             Security
@@ -138,7 +138,7 @@ export default function UserDetail() {
                 <div className="bg-white rounded-lg border border-gray-100 shadow-sm mb-6 overflow-hidden transition-all duration-300">
                     <button
                         onClick={() => setShowUserDetails(!showUserDetails)}
-                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition group"
+                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition group cursor-pointer"
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-red-100 text-red-800 flex items-center justify-center font-bold text-xs shrink-0">
@@ -183,7 +183,7 @@ export default function UserDetail() {
                         </h2>
                         <button
                             onClick={() => setShowPlanModal(true)}
-                            className="h-7 px-3 rounded-lg bg-red-800 text-white text-[9px] font-bold hover:bg-red-700 transition shadow-md shadow-red-900/20"
+                            className="h-7 px-3 rounded-lg bg-red-800 text-white text-[9px] font-bold hover:bg-red-700 transition shadow-md shadow-red-900/20 cursor-pointer"
                         >
                             Add Plan
                         </button>
@@ -212,7 +212,18 @@ export default function UserDetail() {
                                                     </p>
                                                 </div>
                                             </div>
-                                            <StatusBadge status={up.status} />
+                                            <div className="flex items-center gap-2">
+                                                <a
+                                                    href={`/admin/userdetail/${user.id}/plan/${up.id}/pdf`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="h-7 w-7 rounded-lg border border-gray-100 bg-white text-red-700 flex items-center justify-center hover:bg-red-50 cursor-pointer"
+                                                    title="Download PDF"
+                                                >
+                                                    <i className="fas fa-file-pdf text-[10px]"></i>
+                                                </a>
+                                                <StatusBadge status={up.status} />
+                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-3 mb-4">
@@ -245,7 +256,7 @@ export default function UserDetail() {
                                         <div className="pt-3 border-t border-gray-50">
                                             <button
                                                 onClick={() => togglePayments(up.id)}
-                                                className="text-[9px] font-bold text-gray-400 hover:text-red-800 uppercase tracking-widest flex items-center gap-1.5 transition"
+                                                className="text-[9px] font-bold text-gray-400 hover:text-red-800 uppercase tracking-widest flex items-center gap-1.5 transition cursor-pointer"
                                             >
                                                 <i className={`fas ${openPayments[up.id] ? 'fa-eye-slash' : 'fa-eye'}`}></i>
                                                 {openPayments[up.id] ? "Hide Ledger" : "View Ledger"}
@@ -328,7 +339,7 @@ export default function UserDetail() {
                                 <label className="hidden sm:block text-[8px] font-bold text-transparent mb-1 opacity-0 pointer-events-none">Submit</label>
                                 <button
                                     disabled={!data.plan_id || !data.amount || processing}
-                                    className="w-full h-9 bg-red-800 border border-red-800 text-white rounded-lg text-[10px] font-bold hover:bg-red-900 disabled:bg-gray-100 disabled:text-gray-400 transition shadow-lg shadow-red-900/10"
+                                    className="w-full h-9 bg-red-800 border border-red-800 text-white rounded-lg text-[10px] font-bold hover:bg-red-900 disabled:bg-gray-100 disabled:text-gray-400 transition shadow-lg shadow-red-900/10 cursor-pointer"
                                 >
                                     <i className="fas fa-file-invoice-dollar mr-2"></i>
                                     Save Log

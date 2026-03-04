@@ -56,7 +56,16 @@ export default function Profile() {
                                 {activePlan.name}
                             </h2>
 
-                            <div className="flex gap-2">
+                            <div className="flex items-center gap-2">
+                                <a
+                                    href={`/profile/plan/${activePlan.id}/pdf`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="h-7 w-7 rounded-full bg-emerald-800 text-white flex items-center justify-center hover:bg-emerald-700"
+                                    title="Download PDF"
+                                >
+                                    <i className="fas fa-file-pdf text-[10px]"></i>
+                                </a>
                                 <button
                                     disabled={active === 0}
                                     onClick={() => setActive(active - 1)}

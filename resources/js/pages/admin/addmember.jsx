@@ -11,7 +11,7 @@ export default function AddMember() {
         role: "user",
         gender: "",
         address: "",
-        password: "",
+        password: "123456789",
     });
 
     const submit = (e) => {
@@ -138,7 +138,7 @@ export default function AddMember() {
                     <div>
                         <label className="form-label">Password</label>
                         <input
-                            type="password"
+                            type="text"
                             value={data.password}
                             onChange={e => setData("password", e.target.value)}
                             className="form-input"

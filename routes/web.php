@@ -17,6 +17,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/forgot-password', 'forgotPassword')->name('forgotpassword');
     Route::get('/profile', 'profile')->name('profile')->middleware('auth');
     Route::post('/profile_update', 'profile_update')->name('profile_update')->middleware('auth');
+    Route::get('/profile/plan/{planId}/pdf', 'planPdf')->name('profile.plan.pdf')->middleware('auth');
 });
 
 Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->name('admin.')->prefix('admin')->group(function () {
@@ -34,6 +35,7 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/programs', 'programs')->name('programs');
     Route::get('/users', 'users')->name('users');
     Route::get('/settings', 'settings')->name('settings');
+    Route::get('/reports', 'reports')->name('reports');
 
     // Plan CRUD
     Route::post('/plans', 'storePlan')->name('storeplan');
@@ -43,6 +45,9 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     // User Edit + Password
     Route::put('/user/{id}', 'updateUser')->name('updateuser');
     Route::put('/user/{id}/password', 'updateUserPassword')->name('updateuserpassword');
+
+    // User Plan PDF
+    Route::get('/userdetail/{userId}/plan/{planId}/pdf', 'userPlanPdf')->name('userplan.pdf');
 });
 
 Route::controller(AuthController::class)->group(function () {
