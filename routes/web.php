@@ -8,12 +8,9 @@ use Inertia\Inertia;
 
 
 Route::controller(UserController::class)->group(function () {
-    Route::get('/', 'home')->name('home');
-    Route::get('/programs', 'programs')->name('programs');
-    Route::get('/vision', 'vision')->name('vision');
-    Route::get('/join', 'join')->name('join');
-    Route::get('/privacy-policy', 'privacyPolicy')->name('privacy-policy');
-    Route::get('/account-deletion', 'accountDeletion')->name('account-deletion');
+    Route::get('/', function () {
+        return redirect()->route('login');
+    });
     Route::get('/login', 'login')->name('login');
     Route::get('/signup', 'signup')->name('signup');
     Route::get('/forgot-password', 'forgotPassword')->name('forgotpassword');

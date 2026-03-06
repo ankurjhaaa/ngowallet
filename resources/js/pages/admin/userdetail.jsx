@@ -58,31 +58,23 @@ export default function UserDetail() {
  }
 
  return (
- <AdminLayout>
- <div className="w-full min-w-0 overflow-x-hidden px-1">
- {/* ================= BREADCRUMB + HEADER SECTION ================= */}
- <div className="mb-2">
- <a href="/admin/users"className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-400 hover:text-red-700 transition font-medium">
- <i className="fas fa-arrow-left text-[8px]"></i>
- Back to Users
- </a>
- </div>
+ <AdminLayout title="User Dashboard">
+ <div className="w-full min-w-0 overflow-x-hidden px-1 pb-20 mt-2">
  <div className="mb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
  <div>
- <h1 className="text-xl font-bold text-gray-900 leading-tight">User Dashboard</h1>
- <p className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5">Profile & commitments for {user.name}{user.nickname ?` (${user.nickname})` :''}</p>
+ <p className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5 tracking-wide font-medium">Profile & commitments for {user.name}{user.nickname ?` (${user.nickname})` :''}</p>
  </div>
  <div className="flex gap-2">
  <button
  onClick={() => setShowEditModal(true)}
- className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-md bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 cursor-pointer"
+ className="flex-1 sm:flex-none h-8 px-3 rounded-md bg-white border border-gray-200 text-gray-700 text-[10px] sm:text-xs font-bold hover:bg-gray-50 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
  >
  <i className="fas fa-user-edit text-red-700"></i>
- Edit
+ Edit Profile
  </button>
  <button
  onClick={() => setShowPasswordModal(true)}
- className="flex-1 sm:flex-none h-8 sm:h-9 px-3 rounded-md bg-white border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center justify-center gap-2 cursor-pointer"
+ className="flex-1 sm:flex-none h-8 px-3 rounded-md bg-white border border-gray-200 text-gray-700 text-[10px] sm:text-xs font-bold hover:bg-gray-50 shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
  >
  <i className="fas fa-shield-alt text-amber-600"></i>
  Security
@@ -348,13 +340,12 @@ export default function UserDetail() {
  </div>
  </form>
  </div>
- </div>
 
  {/* Modals remain mostly the same but could use minor styling tweaks to match the new theme */}
  {showPlanModal && <PlanModal onClose={() => setShowPlanModal(false)} plans={ngo_plans} user_id={user.id} />}
  {showEditModal && <EditUserModal user={user} onClose={() => setShowEditModal(false)} />}
  {showPasswordModal && <ChangePasswordModal userId={user.id} onClose={() => setShowPasswordModal(false)} />}
-
+ </div>
  </AdminLayout>
  );
 }

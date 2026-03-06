@@ -1,204 +1,155 @@
-import { useState } from"react";
-import AdminLayout from"@/layouts/AdminLayout";
-import { Link, usePage, router } from"@inertiajs/react";
+ import { useState } from "react";
+ import AdminLayout from "@/layouts/AdminLayout";
+ import { Link, usePage, router } from "@inertiajs/react";
+ import { UserPlus, Search, ChevronRight, Filter } from "lucide-react";
+ import { cn } from "@/lib/utils";
 
-export default function Users() {
- const { users, filters } = usePage().props;
+ export default function Users() {
+  const { users, filters } = usePage().props;
 
- const [search, setSearch] = useState(filters?.search ||"");
- const [role, setRole] = useState(filters?.role ||"all");
+  const [search, setSearch] = useState(filters?.search || "");
+  const [role, setRole] = useState(filters?.role || "all");
 
- const handleSearch = (e) => {
- const value = e.target.value;
- setSearch(value);
+  const handleSearch = (e) => {
+  const value = e.target.value;
+  setSearch(value);
 
- router.get(
-"/admin/users",
- { search: value, role },
- { preserveState: true, replace: true }
- );
- };
+  router.get(
+ "/admin/users",
+  { search: value, role },
+  { preserveState: true, replace: true }
+  );
+  };
 
- const changeRole = (r) => {
- setRole(r);
+  const changeRole = (r) => {
+  setRole(r);
 
- router.get(
-"/admin/users",
- { search, role: r },
- { preserveState: true, replace: true }
- );
- };
+  router.get(
+ "/admin/users",
+  { search, role: r },
+  { preserveState: true, replace: true }
+  );
+  };
 
- return ( 
- <AdminLayout>
+  return ( 
+  <AdminLayout>
 
- {/* HEADER */}
- <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
- <div>
- <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
- Users
- </h1>
- <p className="text-xs sm:text-sm text-gray-500 mt-1">
- Showing {users.total} users
- </p>
- </div>
- <Link
- href="/admin/add-member-page"
- className="
- inline-flex items-center justify-center gap-2
- h-10 px-5 rounded-md
- bg-red-800 text-white text-sm font-medium
- hover:bg-red-900 transition
+  {/* HEADER */}
+  <div className="flex items-center justify-between mb-4 mt-2 px-1">
+  <div>
+  <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+  Members Directory
+  </h1>
+  <p className="text-xs text-slate-500 font-medium tracking-wide">
+  Total: {users.total} entries
+  </p>
+  </div>
+  <Link
+  href="/admin/add-member-page"
+  className="flex items-center justify-center h-10 w-10 sm:h-auto sm:w-auto sm:px-4 rounded-md bg-red-600 text-white hover:bg-red-700 transition-colors active:scale-95"
+  >
+  <UserPlus className="h-4 w-4 sm:mr-2" />
+  <span className="hidden sm:inline text-sm font-semibold">Add New</span>
+  </Link>
+  </div>
 
- w-full sm:w-auto
-"
- >
- <i className="fas fa-user-plus text-xs"></i>
- Add Member
- </Link>
- </div>
+  {/* FILTER BAR */}
+  <div className="mb-4 flex flex-col sm:flex-row gap-3">
+  {/* SEARCH */}
+  <div className="relative flex-1">
+    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+    <input
+    value={search}
+    onChange={handleSearch}
+    placeholder="Search members..."
+    className="w-full h-11 pl-10 pr-4 rounded-md bg-white border-none focus:ring-2 focus:ring-red-100 transition-all text-sm shadow-sm"
+    />
+  </div>
 
- {/* FILTER BAR */}
- <div className="mb-4 flex flex-col lg:flex-row gap-4 lg:items-center lg:justify-between">
+  {/* ROLE FILTER */}
+  <div className="flex gap-1 overflow-x-auto custom-scrollbar pb-1 sm:pb-0">
+  {["all", "member", "user", "admin"].map(r => (
+  <button
+  key={r}
+  onClick={() => changeRole(r)}
+  className={cn(
+    "whitespace-nowrap h-11 px-4 rounded-md text-xs font-bold uppercase tracking-widest transition-all shadow-sm",
+    role === r ? "bg-slate-900 text-white" : "bg-white text-slate-500 hover:bg-slate-50"
+  )}
+  >
+  {r}
+  </button>
+  ))}
+  </div>
+  </div>
 
- {/* SEARCH */}
- <input
- value={search}
- onChange={handleSearch}
- placeholder="Search by name, phone or email"
- className="
- w-full lg:w-96 h-11 px-4 rounded-md
- bg-white text-sm text-gray-700
- placeholder:text-gray-400
- focus:outline-none focus:ring-2 focus:ring-red-200
-"
- />
+  {/* USER LIST (MOBILE/APP STYLE) */}
+  <div className="space-y-2 pb-20">
+  {users.data.length === 0 ? (
+    <div className="text-center py-10 bg-white rounded-md">
+      <Filter className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+      <span className="text-sm font-medium text-slate-500">No members found</span>
+    </div>
+  ) : (
+  users.data.map(user => (
+  <Link
+  key={user.id}
+  href={`/admin/userdetail/${user.id}`}
+  className="flex items-center justify-between p-3 sm:p-4 rounded-md bg-white border border-slate-50 group hover:shadow-md hover:border-red-100 transition-all active:scale-[0.98]"
+  >
+  <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-md bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-500 font-bold group-hover:bg-red-500 group-hover:text-white transition-colors">
+      {user.name.charAt(0)}
+    </div>
+    <div className="min-w-0">
+      <p className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate leading-tight mb-1">
+        {user.name}
+      </p>
+      <div className="flex items-center gap-2">
+        <p className="text-[10px] sm:text-xs text-slate-500 font-medium truncate">
+          {user.phone || user.email}
+        </p>
+        <span className={cn(
+          "inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider",
+          user.role === 'admin' ? 'bg-purple-100 text-purple-700' :
+          user.role === 'member' ? 'bg-emerald-100 text-emerald-700' :
+          'bg-slate-100 text-slate-600'
+        )}>
+          {user.role}
+        </span>
+      </div>
+    </div>
+  </div>
+  
+  <div className="h-8 w-8 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-red-50 group-hover:text-red-600 transition-all">
+    <ChevronRight className="h-4 w-4" />
+  </div>
+  </Link>
+  ))
+  )}
+  </div>
 
- {/* ROLE FILTER */}
- <div className="flex gap-2 flex-wrap">
- {["all","member","user"].map(r => (
- <button
- key={r}
- onClick={() => changeRole(r)}
- className={`
- h-9 px-4 rounded-md text-sm transition
- ${role === r
- ?"bg-red-800 text-white"
- :"bg-white text-gray-600 hover:bg-red-50"}
-`}
- >
- {r.charAt(0).toUpperCase() + r.slice(1)}
- </button>
- ))}
- </div>
- </div>
-
- {/* TABLE */}
- <div className="bg-white rounded-md overflow-hidden">
- <div className="overflow-x-auto">
- <table className="w-full text-sm">
- <thead className="bg-gray-50 text-gray-600">
- <tr>
- <th className="px-3 sm:px-4 py-3 sm:py-4 text-left font-medium text-xs sm:text-sm">
- User
- </th>
- <th className="px-3 sm:px-4 py-3 sm:py-4 text-left font-medium text-xs sm:text-sm hidden sm:table-cell">
- Nickname
- </th>
- <th className="px-3 sm:px-4 py-3 sm:py-4 text-left font-medium text-xs sm:text-sm">
- Role
- </th>
- <th className="px-3 sm:px-4 py-3 sm:py-4 text-right font-medium text-xs sm:text-sm">
- Action
- </th>
- </tr>
- </thead>
-
- <tbody>
- {users.data.length === 0 ? (
- <tr>
- <td colSpan="4"className="py-5 text-center text-gray-500">
- No users found
- </td>
- </tr>
- ) : (
- users.data.map(user => (
- <tr
- key={user.id}
- className="hover:bg-red-50/40 transition"
- >
- <td className="px-3 sm:px-4 py-3 sm:py-4">
- <p className="font-medium text-gray-900 text-sm">
- {user.name}
- </p>
- <p className="text-xs text-gray-500">
- {user.phone}
- </p>
- {/* Show nickname on mobile below name */}
- {user.nickname && (
- <p className="text-[10px] text-gray-400 sm:hidden">
- {user.nickname}
- </p>
- )}
- </td>
-
- <td className="px-3 sm:px-4 py-3 sm:py-4 text-gray-600 text-sm hidden sm:table-cell">
- {user.nickname ||"—"}
- </td>
-
- <td className="px-3 sm:px-4 py-3 sm:py-4 capitalize text-gray-700 text-xs sm:text-sm">
- <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium ${
- user.role ==='admin' ?'bg-purple-100 text-purple-700' :
- user.role ==='member' ?'bg-emerald-100 text-emerald-700' :
-'bg-gray-100 text-gray-600'
- }`}>
- {user.role}
- </span>
- </td>
-
- <td className="px-3 sm:px-4 py-3 sm:py-4 text-right">
- <Link
- href={`/admin/userdetail/${user.id}`}
- className="
- inline-flex items-center gap-1
- text-xs sm:text-sm text-red-700
- hover:text-red-900
- hover:underline underline-offset-4
-"
- >
- <i className="fas fa-eye text-[10px]"></i>
- View
- </Link>
- </td>
- </tr>
- ))
- )}
- </tbody>
- </table>
- </div>
- </div>
-
- {/* PAGINATION */}
- <div className="mt-4 flex justify-end gap-1 flex-wrap">
- {users.links.map((link, index) => (
- <button
- key={index}
- disabled={!link.url}
- onClick={() =>
- link.url &&
- router.get(link.url, {}, { preserveState: true })
- }
- className={`
- min-w-[36px] h-9 px-3 rounded-md text-sm transition
- ${link.active
- ?"bg-red-800 text-white"
- :"bg-white text-gray-600 hover:bg-red-50"}
- ${!link.url &&"opacity-40 cursor-not-allowed"}
-`}
- dangerouslySetInnerHTML={{ __html: link.label }}
- />
- ))}
- </div>
+  {/* PAGINATION */}
+  {users.links.length > 3 && (
+  <div className="mt-4 pb-20 flex justify-center gap-1 flex-wrap">
+  {users.links.map((link, index) => (
+  <button
+  key={index}
+  disabled={!link.url}
+  onClick={() =>
+  link.url &&
+  router.get(link.url, {}, { preserveState: true })
+  }
+  className={cn(
+    "min-w-[36px] h-9 px-3 rounded-md text-xs font-bold transition-all",
+    link.active ? "bg-red-600 text-white shadow-sm" : "bg-white text-slate-500 hover:bg-slate-50",
+    !link.url && "opacity-40 cursor-not-allowed shadow-none"
+  )}
+  dangerouslySetInnerHTML={{ __html: link.label }}
+  />
+  ))}
+  </div>
+  )}
 
  </AdminLayout>
  );

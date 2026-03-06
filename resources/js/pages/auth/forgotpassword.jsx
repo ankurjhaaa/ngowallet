@@ -1,70 +1,81 @@
-import PublicLayout from"@/layouts/PublicLayout";
-import { Link } from"@inertiajs/react";
+import { Link, Head } from"@inertiajs/react";
+import { Button } from"@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from"@/components/ui/card";
+import { Input } from"@/components/ui/input";
+import { Label } from"@/components/ui/label";
+import { Phone, ArrowLeft, ShieldCheck } from"lucide-react";
+import { motion } from"framer-motion";
 
-export default function forgotpassword() {
+export default function ForgotPassword() {
  return (
- <PublicLayout>
- <div className="min-h-[80vh] flex items-center justify-center px-4">
+ <div className="min-h-screen bg-white">
+ <Head title="Forgot Password — Bazm-e-Haidri"/>
+ 
+ <div className="min-h-screen flex items-center justify-center px-4 py-12 relative overflow-hidden bg-white">
+ {/* Decorative background elements */}
+ <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-red-50 rounded-full blur-3xl -z-0 translate-x-1/2 -translate-y-1/2 opacity-60"></div>
+ <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-red-50 rounded-full blur-3xl -z-0 -translate-x-1/2 translate-y-1/2 opacity-60"></div>
 
- <div className="w-full max-w-md bg-white rounded-md p-4">
-
- {/* Tab Header (disabled look) */}
- <div className="flex mb-4">
- <Link
- href="/login"
- className="flex-1 text-center py-2 rounded-md text-gray-500 text-sm font-medium hover:bg-gray-100"
+ <motion.div 
+ initial={{ opacity: 0, y: 20 }}
+ animate={{ opacity: 1, y: 0 }}
+ transition={{ duration: 0.6 }}
+ className="w-full max-w-[420px] relative z-10"
  >
- Login
- </Link>
- <Link
- href="/signup"
- className="flex-1 text-center py-2 rounded-md text-gray-500 text-sm font-medium hover:bg-gray-100"
+ {/* Brand Logo */}
+ <div className="text-center mb-10">
+ <motion.div 
+ initial={{ scale: 0.8 }}
+ animate={{ scale: 1 }}
+ className="w-16 h-16 mx-auto rounded-3xl bg-slate-100 text-slate-400 flex items-center justify-center mb-6"
  >
- Sign Up
- </Link>
+ <ShieldCheck className="h-8 w-8"/>
+ </motion.div>
+ <h1 className="text-3xl font-black tracking-tight text-slate-900 mb-2">Reset Password</h1>
+ <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Portal Security</p>
  </div>
 
- {/* Title */}
- <h1 className="text-xl font-bold text-gray-900 text-center">
- Forgot Password?
- </h1>
- <p className="text-sm text-gray-500 text-center mt-1">
- Enter your phone number to reset your password
- </p>
-
- {/* Form */}
- <form className="mt-4 space-y-4">
-
- {/* Phone */}
- <div>
- <label className="text-sm text-gray-600">
- Phone Number
- </label>
- <input
+ <Card className="border-none rounded-[32px] overflow-hidden bg-white shadow-2xl shadow-slate-200/60 ring-1 ring-slate-100/50">
+ <CardHeader className="pt-10 pb-6 text-center">
+ <CardTitle className="text-2xl font-black tracking-tight text-slate-900">Recovery</CardTitle>
+ <CardDescription className="text-slate-400 mt-2 font-medium">
+ Enter your phone to get reset link
+ </CardDescription>
+ </CardHeader>
+ 
+ <CardContent className="px-8 pb-10">
+ <form className="space-y-6">
+ <div className="space-y-2">
+ <Label htmlFor="phone"className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Phone Number</Label>
+ <div className="relative">
+ <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300"/>
+ <Input
+ id="phone"
  type="tel"
- placeholder="Enter registered phone number"
- className="mt-1 w-full px-4 py-2.5 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-gray-50"
+ placeholder="10 digit mobile number"
+ className="h-14 pl-12 rounded-xl border-slate-100 bg-slate-50/50 focus:bg-white transition-all text-sm font-bold shadow-none"
  />
  </div>
+ </div>
 
- <button
+ <Button 
  type="submit"
- className="w-full bg-emerald-800 text-white py-2.5 rounded-md hover:bg-emerald-700 transition font-medium"
+ className="w-full h-16 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all text-lg font-black group shadow-lg shadow-red-900/20 active:scale-[0.98]"
  >
- Send Reset Link / OTP
- </button>
+ Send Reset Link
+ </Button>
  </form>
-
- {/* Back link */}
- <p className="text-sm text-center text-gray-500 mt-4">
- Remembered your password?{""}
- <a href="/login"className="text-emerald-700 hover:underline font-medium">
- Login
- </a>
- </p>
+ </CardContent>
+ 
+ <CardFooter className="bg-slate-50/50 px-8 py-4 border-t border-slate-50 flex justify-center">
+ <Link href="/login"className="inline-flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 tracking-widest hover:text-red-600 transition-colors">
+ <ArrowLeft className="h-3.5 w-3.5"/>
+ Back to Login
+ </Link>
+ </CardFooter>
+ </Card>
+ </motion.div>
  </div>
-
  </div>
- </PublicLayout>
  );
 }

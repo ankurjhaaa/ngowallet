@@ -20,35 +20,13 @@ export default function AddMember() {
  };
 
  return (
- <AdminLayout>
+  <AdminLayout title="Add New Member">
 
- {/* ================= HEADER ================= */}
- <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
- <div>
- <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
- Add New Member
- </h1>
- <p className="text-xs sm:text-sm text-gray-500 mt-1">
- Create a new user or member account
- </p>
- </div>
- <Link
- href="/admin/users"
- className="
- inline-flex items-center justify-center gap-2
- h-9 px-4 rounded-md text-sm
- text-gray-600 border border-gray-200
- hover:bg-gray-50 transition
- w-full sm:w-auto
-"
- >
- <i className="fas fa-arrow-left text-xs"></i>
- Back to Users
- </Link>
- </div>
-
- {/* ================= FORM ================= */}
- <div className="max-w-4xl bg-white rounded-md p-4">
+  {/* ================= FORM ================= */}
+  <div className="max-w-4xl bg-white rounded-md p-4 mt-2 pb-20 shadow-sm">
+  <p className="text-xs text-slate-500 mb-4 font-medium tracking-wide">
+  Create a new user or member account
+  </p>
 
  <form onSubmit={submit} className="grid grid-cols-1 md:grid-cols-2 gap-3">
 

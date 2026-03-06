@@ -34,15 +34,10 @@ export default function Dashboard() {
  const [search, setSearch] = useState(filters.search ||"");
 
  return (
- <AdminLayout>
+ <AdminLayout title="Dashboard Overview">
+ <div className="pb-20">
  {/* Page Header */}
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
- <motion.div {...fadeInUp}>
- <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
- Dashboard Overview
- </h1>
- </motion.div>
- <div className="flex gap-2">
+ <div className="flex flex-row items-center justify-end gap-3 mb-4 mt-2">
  <Button asChild variant="outline"size="sm"className="rounded-md border-slate-200 transition-all hover:bg-slate-100">
  <Link href="/admin/reports">
  <FileText className="h-4 w-4 mr-2"/>
@@ -53,7 +48,6 @@ export default function Dashboard() {
  <PlusCircle className="h-4 w-4 mr-2"/>
  Quick Payment
  </Button>
- </div>
  </div>
 
  {/* Core Stats */}
@@ -170,7 +164,7 @@ export default function Dashboard() {
  </Card>
  </div>
  </div>
-
+ </div>
  {/* Payment Modal */}
  {openPaymentModal && (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">

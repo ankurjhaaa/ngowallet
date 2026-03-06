@@ -31,18 +31,15 @@ export default function Plans() {
  };
 
  return (
- <AdminLayout>
- <div className="max-w-full overflow-hidden px-1 min-w-0">
+ <AdminLayout title="Plans Management">
+ <div className="max-w-full overflow-hidden px-1 min-w-0 pb-20">
  {/* ================= HEADER ================= */}
- <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
- <div>
- <h1 className="text-xl font-bold text-gray-900 leading-tight">Plans Management</h1>
- <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Configure and manage yearly commitment plans</p>
- </div>
+ <div className="flex items-center justify-between mb-4 mt-2">
+ <p className="text-[10px] sm:text-xs text-slate-500 font-medium tracking-wide">Configure yearly plans</p>
 
  <button
  onClick={openAdd}
- className="h-10 px-5 rounded-md bg-red-800 text-white text-xs font-bold hover:bg-red-700 transition flex items-center justify-center gap-2"
+ className="h-9 px-4 rounded-md bg-red-600 text-white text-[10px] sm:text-xs font-bold hover:bg-red-700 transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95"
  >
  <i className="fas fa-plus-circle"></i>
  New Plan

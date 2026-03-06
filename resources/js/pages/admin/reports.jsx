@@ -115,10 +115,10 @@ export default function Reports() {
  };
 
  return (
- <AdminLayout>
- <div className="mb-4">
- <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Reports & Analytics</h1>
- <p className="text-xs sm:text-sm text-gray-500 mt-1">
+ <AdminLayout title="Reports & Analytics">
+ <div className="pb-20">
+ <div className="mb-4 mt-2">
+ <p className="text-xs text-slate-500 mb-4 font-medium tracking-wide">
  Dynamic reports with filters and real-time totals.
  </p>
  </div>
@@ -280,6 +280,7 @@ export default function Reports() {
  ) : (
  <Bar data={monthlyBarData} options={chartOptions} />
  )}
+ </div>
  </div>
  </div>
  </div>

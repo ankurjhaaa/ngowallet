@@ -2,6 +2,8 @@ import { router, usePage } from"@inertiajs/react";
 import { useState } from"react";
 import AdminLayout from"@/layouts/AdminLayout";
 
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+
 export default function Transactions() {
  const {
  payments,
@@ -50,7 +52,7 @@ export default function Transactions() {
  preserveState: true,
  replace: true,
  });
- setShowMobileFilters(false); // Close mobile filters after applying
+ setShowMobileFilters(false);
  };
 
  const clearFilters = () => {
@@ -67,7 +69,7 @@ export default function Transactions() {
 
  setMemberId("");
  setMemberLabel("");
- setShowMobileFilters(false); // Close mobile filters after clearing
+ setShowMobileFilters(false);
  };
 
  const selectMember = (member) => {
@@ -83,7 +85,7 @@ export default function Transactions() {
 
  const searchMembers = () => {
  router.get(
-"/admin/transactions",
+ "/admin/transactions",
  buildFilterParams({
  member_query: memberSearch,
  member_page: 1,
@@ -99,7 +101,7 @@ export default function Transactions() {
  const sendMessage = (paymentId) => {
  setSendingId(paymentId);
  router.post(
-`/admin/transactions/${paymentId}/send-message`,
+ `/admin/transactions/${paymentId}/send-message`,
  {},
  {
  preserveScroll: true,
@@ -109,178 +111,147 @@ export default function Transactions() {
  };
 
  return (
- <AdminLayout>
+ <AdminLayout title="All Transactions">
+ <div className="pb-20">
  {/* header + filters container */}
- <div className="mb-4">
- <div className="bg-white rounded-md border border-gray-100">
+ <div className="mb-4 mt-2 px-1">
+ <div className="bg-white rounded-md border border-slate-100 shadow-sm overflow-hidden">
  {/* HEADER */}
- <div className="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+ <div className="p-3 flex items-center justify-between gap-3">
  <div>
- <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
- All Transactions
- </h1>
- <p className="text-xs sm:text-sm text-gray-500 mt-1">
- {payments.total} record{payments.total !== 1 ?'s' :''}
+ <p className="text-[10px] sm:text-xs text-slate-500 font-bold tracking-tight uppercase">
+ {payments.total} Total record{payments.total !== 1 ?'s' :''}
  </p>
  </div>
  <div className="flex gap-2">
- {/* Mobile Filter Toggle */}
- <button
- onClick={() => setShowMobileFilters(!showMobileFilters)}
- className="sm:hidden flex items-center gap-2 h-9 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition relative"
- >
- <i className={`fas fa-filter text-xs`}></i>
- {showMobileFilters ?'Hide Filters' :'Filters'}
+ {/* Mobile Filter Toggle - Bottom Sheet */}
+ <Sheet open={showMobileFilters} onOpenChange={setShowMobileFilters}>
+ <SheetTrigger asChild>
+ <button className="flex items-center gap-2 h-8 px-3 rounded-md bg-white border border-slate-200 text-slate-600 text-[10px] font-bold hover:bg-slate-50 transition relative active:scale-95 shadow-sm">
+ <i className="fas fa-filter text-xs text-red-600"></i>
+ Filters
  {(query || memberId || paymentMode !=='all' || planId !=='all' || from || to) && (
- <span className="absolute -top-1 -right-1 h-4 w-4 bg-amber-400 rounded-md text-[10px] font-bold text-gray-900 flex items-center justify-center">
- !
- </span>
+ <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-600 rounded-full border border-white"></span>
  )}
  </button>
- </div>
- </div>
- {/* FILTERS */}
- <div className={`border-t border-gray-100 overflow-hidden transition-all duration-300 ${showMobileFilters ?'max-h-[2000px] p-3 sm:p-3' :'max-h-0 sm:max-h-none p-0 sm:p-3'} sm:block`}>
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
+ </SheetTrigger>
+ <SheetContent side="bottom" className="rounded-t-[24px] p-0 border-none px-6 pb-12 pt-2 ring-1 ring-black/5">
+ <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
+ <SheetHeader className="mb-6">
+ <SheetTitle className="text-xl font-black text-slate-900 tracking-tight text-left">Search & Filter</SheetTitle>
+ </SheetHeader>
+ 
+ <div className="space-y-5">
+ <div className="space-y-1.5">
+ <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Keywords</label>
  <input
  value={query}
  onChange={(e) => setQuery(e.target.value)}
- placeholder="Search by amount / member"
- className="w-full h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+ placeholder="Search amount or name..."
+ className="w-full h-12 rounded-xl bg-slate-50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-red-100"
  />
+ </div>
 
- <button
- onClick={() => setOpenMemberModal(true)}
- className="h-10 rounded-md border border-gray-200 px-3 text-sm text-left text-gray-700 bg-white hover:bg-gray-50 transition truncate"
- >
- {memberLabel ||"Select Member"}
- </button>
-
+ <div className="space-y-1.5">
+ <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Payment Mode</label>
  <select
  value={paymentMode}
  onChange={(e) => setPaymentMode(e.target.value)}
- className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+ className="w-full h-12 rounded-xl bg-slate-50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-red-100"
  >
  {paymentModes.map((mode) => (
- <option key={mode} value={mode}>
- {mode ==="all"?"All Modes": mode.toUpperCase()}
- </option>
+ <option key={mode} value={mode}>{mode ==="all"?"All Modes": mode.toUpperCase()}</option>
  ))}
  </select>
+ </div>
 
- <select
- value={planId}
- onChange={(e) => setPlanId(e.target.value)}
- className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
- >
- <option value="all">All Plans</option>
- {plans.map((plan) => (
- <option key={plan.id} value={plan.id}>{plan.name}</option>
+ <div className="flex gap-3 pt-6">
+ <button onClick={clearFilters} className="flex-1 h-14 rounded-xl bg-slate-100 text-slate-600 text-sm font-bold active:scale-95 transition">Reset</button>
+ <button onClick={applyFilters} className="flex-[2] h-14 rounded-xl bg-red-600 text-white text-sm font-bold shadow-lg shadow-red-900/20 active:scale-95 transition">Apply</button>
+ </div>
+ </div>
+ </SheetContent>
+ </Sheet>
+ </div>
+ </div>
+
+ {/* DESKTOP FILTERS - Hidden on Mobile */}
+ <div className="hidden sm:block border-t border-slate-50 p-3 bg-slate-50/20">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
+ <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search..." className="h-8 rounded-md border border-slate-200 px-3 text-[10px] focus:ring-1 focus:ring-red-100" />
+ <select value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)} className="h-8 rounded-md border border-slate-200 px-3 text-[10px]">
+ {paymentModes.map((mode) => (
+ <option key={mode} value={mode}>{mode ==="all"?"All Modes": mode.toUpperCase()}</option>
  ))}
  </select>
-
- <input
- type="date"
- value={from}
- onChange={(e) => setFrom(e.target.value)}
- placeholder="From Date"
- className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
- />
- <input
- type="date"
- value={to}
- onChange={(e) => setTo(e.target.value)}
- placeholder="To Date"
- className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
- />
- </div>
-
- <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mt-3">
- <button
- onClick={applyFilters}
- className="h-9 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition cursor-pointer"
- >
- Apply
- </button>
- <button
- onClick={clearFilters}
- className="h-9 px-4 rounded-md bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition cursor-pointer"
- >
- Reset
- </button>
- {memberId && (
- <button
- onClick={clearMemberFilter}
- className="h-9 px-4 rounded-md bg-amber-50 text-amber-700 text-sm font-medium hover:bg-amber-100 transition cursor-pointer col-span-2 sm:col-span-1"
- >
- Clear Member
- </button>
- )}
+ <button onClick={applyFilters} className="h-8 px-4 rounded-md bg-red-600 text-white text-[10px] font-bold">Apply</button>
+ <button onClick={clearFilters} className="h-8 px-4 rounded-md bg-slate-200 text-slate-600 text-[10px] font-bold">Reset</button>
  </div>
  </div>
  </div>
  </div>
 
- <div className="bg-white rounded-md border border-gray-100 overflow-hidden">
+ <div className="bg-white rounded-md border border-slate-100 overflow-hidden shadow-sm">
  {/* Mobile scroll hint */}
- <div className="sm:hidden bg-amber-50 border-b border-amber-100 px-3 py-2 text-xs text-amber-700 flex items-center gap-2">
- <i className="fas fa-arrows-alt-h"></i>
- <span>Scroll horizontally to view all columns</span>
+ <div className="sm:hidden bg-slate-50 border-b border-slate-100 px-3 py-2.5 text-[10px] font-bold text-slate-400 flex items-center gap-2 uppercase tracking-widest">
+ <i className="fas fa-arrows-alt-h text-red-500"></i>
+ <span>Scroll for more</span>
  </div>
  <div className="overflow-x-auto">
- <table className="w-full min-w-[980px] text-sm">
- <thead className="bg-gray-50 text-gray-600">
+ <table className="w-full min-w-[980px] text-[13px]">
+ <thead className="bg-slate-50/50 text-slate-500 border-b border-slate-100">
  <tr>
- <th className="text-left px-4 py-3 font-medium">Date</th>
- <th className="text-left px-4 py-3 font-medium">Member</th>
- <th className="text-left px-4 py-3 font-medium">Plan</th>
- <th className="text-right px-4 py-3 font-medium">Amount</th>
- <th className="text-left px-4 py-3 font-medium">Mode</th>
- <th className="text-center px-4 py-3 font-medium">OTP History</th>
- <th className="text-right px-4 py-3 font-medium">Action</th>
+ <th className="text-left px-4 py-4 font-bold uppercase tracking-wider text-[10px]">Date</th>
+ <th className="text-left px-4 py-4 font-bold uppercase tracking-wider text-[10px]">Member</th>
+ <th className="text-left px-4 py-4 font-bold uppercase tracking-wider text-[10px]">Plan</th>
+ <th className="text-right px-4 py-4 font-bold uppercase tracking-wider text-[10px]">Amount</th>
+ <th className="text-left px-4 py-4 font-bold uppercase tracking-wider text-[10px]">Mode</th>
+ <th className="text-center px-4 py-4 font-bold uppercase tracking-wider text-[10px]">OTP Status</th>
+ <th className="text-right px-4 py-4 font-bold uppercase tracking-wider text-[10px]">Action</th>
  </tr>
  </thead>
- <tbody>
+ <tbody className="divide-y divide-slate-50">
  {payments.data.length === 0 ? (
  <tr>
- <td colSpan="8"className="py-5 text-center text-gray-500">
- No transactions found.
+ <td colSpan="8"className="py-12 text-center text-slate-400 font-medium italic">
+ No transactions found matching filters.
  </td>
  </tr>
  ) : (
  payments.data.map((payment) => (
- <tr key={payment.id} className="border-t border-gray-100 hover:bg-gray-50/50 transition">
- <td className="px-4 py-3 text-gray-700">{payment.payment_date}</td>
- <td className="px-4 py-3">
- <p className="font-medium text-gray-900">{payment.user?.name ||"-"}</p>
- <p className="text-xs text-gray-500">{payment.user?.phone ||"-"}</p>
+ <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
+ <td className="px-4 py-4 text-slate-600 font-medium">{payment.payment_date}</td>
+ <td className="px-4 py-4">
+ <p className="font-bold text-slate-900 leading-tight">{payment.user?.name ||"-"}</p>
+ <p className="text-[11px] text-slate-400 font-medium mt-1">{payment.user?.phone ||"-"}</p>
  </td>
- <td className="px-4 py-3 text-gray-700">{payment.user_plan?.plan?.name ||"-"}</td>
- <td className="px-4 py-3 text-right font-semibold text-gray-900">₹{Number(payment.amount || 0).toLocaleString()}</td>
- <td className="px-4 py-3">
- <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs bg-gray-100 text-gray-700 uppercase">
+ <td className="px-4 py-4 text-slate-600 font-bold">{payment.user_plan?.plan?.name ||"-"}</td>
+ <td className="px-4 py-4 text-right font-black text-slate-900 text-base tracking-tight">₹{Number(payment.amount || 0).toLocaleString()}</td>
+ <td className="px-4 py-4">
+ <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black bg-slate-100 text-slate-600 uppercase tracking-wider">
  {payment.payment_mode}
  </span>
  </td>
- <td className="px-4 py-3 text-center">
+ <td className="px-4 py-4 text-center">
  {payment.otp_sent_count > 0 ? (
- <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs bg-emerald-100 text-emerald-700 font-medium">
+ <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">
+ <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
  {payment.otp_sent_count} Sent
  </span>
  ) : (
- <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs bg-gray-100 text-gray-600 font-medium">
+ <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-400">
  0 Sent
  </span>
  )}
  </td>
 
- <td className="px-4 py-3 text-right">
+ <td className="px-4 py-4 text-right">
  <button
  onClick={() => sendMessage(payment.id)}
  disabled={sendingId === payment.id}
- className="h-8 px-3 rounded-md bg-red-800 text-white text-xs font-semibold hover:bg-red-900 disabled:opacity-60 transition"
+ className="h-9 px-4 rounded-xl bg-red-600 text-white text-[11px] font-black hover:bg-red-700 disabled:opacity-50 transition-all shadow-md active:scale-95 tracking-wide uppercase"
  >
- {sendingId === payment.id ?"Sending...":"Send Message"}
+ {sendingId === payment.id ?"...": <><i className="fab fa-whatsapp mr-1.5"></i> Send</>}
  </button>
  </td>
  </tr>
@@ -291,17 +262,17 @@ export default function Transactions() {
  </div>
  </div>
 
- <div className="mt-5 flex justify-center sm:justify-end gap-1 flex-wrap">
+ <div className="mt-6 flex justify-center sm:justify-end gap-1.5 flex-wrap px-1">
  {payments.links.map((link, index) => (
  <button
  key={index}
  disabled={!link.url}
  onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })}
  className={`
- min-w-[32px] sm:min-w-[36px] h-8 sm:h-9 px-2 sm:px-3 rounded-md text-xs sm:text-sm transition
- ${link.active ?"bg-red-800 text-white":"bg-white text-gray-600 hover:bg-red-50"}
+ min-w-[36px] h-9 px-3 rounded-xl text-xs font-bold transition-all shadow-sm
+ ${link.active ?"bg-red-600 text-white shadow-red-900/20 active:scale-95":"bg-white text-slate-500 hover:bg-slate-50 active:scale-95"}
  ${!link.url ?"opacity-40 cursor-not-allowed":""}
-`}
+ `}
  dangerouslySetInnerHTML={{ __html: link.label }}
  />
  ))}
@@ -309,61 +280,68 @@ export default function Transactions() {
 
  {openMemberModal && (
  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
- <div className="absolute inset-0 bg-black/40"onClick={() => setOpenMemberModal(false)}></div>
- <div className="relative z-10 bg-white w-full max-w-xl rounded-md p-4 sm:p-3 max-h-[85vh] flex flex-col">
- <div className="flex items-center justify-between mb-3">
- <h3 className="text-base font-semibold text-gray-900">Select Member</h3>
- <button onClick={() => setOpenMemberModal(false)} className="text-gray-400 hover:text-gray-700">
- <i className="fas fa-times"></i>
+ <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"onClick={() => setOpenMemberModal(false)}></div>
+ <div className="relative z-10 bg-white w-full max-w-lg rounded-[24px] p-6 shadow-2xl flex flex-col max-h-[80vh] overflow-hidden">
+ <div className="flex items-center justify-between mb-6">
+ <h3 className="text-xl font-black text-slate-900 tracking-tight">Select Member</h3>
+ <button onClick={() => setOpenMemberModal(false)} className="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+ <i className="fas fa-times text-slate-400"></i>
  </button>
  </div>
 
- <div className="flex flex-col sm:flex-row gap-2 mb-3">
+ <div className="flex gap-2 mb-6">
+ <div className="relative flex-1">
  <input
  value={memberSearch}
  onChange={(e) => setMemberSearch(e.target.value)}
- placeholder="Search member by name or phone"
- className="flex-1 h-10 rounded-md border border-gray-200 px-3 text-sm"
+ placeholder="Name or phone..."
+ className="w-full h-12 rounded-xl bg-slate-50 border-none px-4 text-sm font-bold focus:ring-2 focus:ring-red-100"
  />
+ </div>
  <button
  onClick={searchMembers}
- className="h-10 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition"
+ className="h-12 px-6 rounded-xl bg-red-600 text-white text-sm font-bold shadow-lg shadow-red-900/20 active:scale-95 transition"
  >
  Search
  </button>
  </div>
 
- <div className="flex-1 overflow-y-auto border border-gray-100 rounded-md">
+ <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
  {members.data.length === 0 ? (
- <p className="text-sm text-gray-500 text-center py-4">No members found</p>
+ <div className="text-center py-10 opacity-40 italic text-sm font-medium">No members found</div>
  ) : (
  members.data.map((member) => (
  <button
  key={member.id}
  onClick={() => selectMember(member)}
- className="w-full px-3 py-3 text-left border-b border-gray-100 last:border-b-0 hover:bg-red-50/40 transition"
+ className="w-full p-4 text-left rounded-xl border border-slate-50 hover:bg-red-50 transition-all flex items-center justify-between group"
  >
- <p className="font-medium text-gray-900 text-sm">{member.name}</p>
- <p className="text-xs text-gray-500">{member.phone}</p>
+ <div>
+ <p className="font-extrabold text-slate-900 text-sm tracking-tight">{member.name}</p>
+ <p className="text-[11px] text-slate-400 font-bold mt-1 tracking-wider uppercase">{member.phone}</p>
+ </div>
+ <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-red-500 group-hover:text-white transition-all">
+ <i className="fas fa-chevron-right text-[10px]"></i>
+ </div>
  </button>
  ))
  )}
  </div>
 
- <div className="mt-3 flex justify-center sm:justify-end gap-1 flex-wrap">
+ <div className="mt-6 pt-6 border-t border-slate-50 flex justify-center gap-1.5 flex-wrap">
  {members.links.map((link, index) => (
  <button
  key={index}
  disabled={!link.url}
  onClick={() => {
  if (!link.url) return;
- router.get(link.url, {}, { preserveState: true, replace: true });
+ router.get(link.url, { member_query: memberSearch, open_member_modal: 1 }, { preserveState: true, replace: true });
  }}
  className={`
- min-w-[28px] sm:min-w-[34px] h-7 sm:h-8 px-1.5 sm:px-2 rounded text-xs transition
- ${link.active ?"bg-red-800 text-white":"bg-gray-100 text-gray-700 hover:bg-gray-200"}
+ min-w-[32px] h-8 px-2 rounded-lg text-[10px] font-black transition-all
+ ${link.active ?"bg-red-600 text-white shadow-md":"bg-slate-100 text-slate-500 hover:bg-slate-200"}
  ${!link.url ?"opacity-40 cursor-not-allowed":""}
-`}
+ `}
  dangerouslySetInnerHTML={{ __html: link.label }}
  />
  ))}
@@ -371,6 +349,7 @@ export default function Transactions() {
  </div>
  </div>
  )}
+ </div>
  </AdminLayout>
  );
 }
