@@ -799,7 +799,7 @@ class AdminController extends Controller
             'plan_name' => $userPlan->plan?->name ?? 'Plan',
             'yearly_amount' => $userPlan->yearly_amount ?? 0,
             'total_paid' => $userPlan->totalPaid(),
-            'due_amount' => max(0, $userPlan->dueAmount()),
+            'due_amount' => $userPlan->dueAmount(),
             'start_date' => $userPlan->start_date ? Carbon::parse($userPlan->start_date)->format('d M Y') : '-',
             'end_date' => $userPlan->end_date ? Carbon::parse($userPlan->end_date)->format('d M Y') : '-',
             'issued_date' => now()->format('d M Y'),
@@ -807,8 +807,36 @@ class AdminController extends Controller
         ];
 
         $pdf = Pdf::loadView('pdf.plan-receipt', $data)->setPaper('a4');
-        $filename = 'plan-' . $userPlan->id . '-statement.pdf';
+        return $pdf->download("Receipt-{$userPlan->id}.pdf");
+    }
 
-        return $pdf->download($filename);
+    public function downloadCommitmentsPdf()
+    {
+        $userPlans = UserPlan::with(['user', 'plan', 'payments'])->get()->map(function ($up) {
+            $totalPaid = $up->totalPaid();
+            return [
+                'user_name' => $up->user->name ?? '-',
+                'phone' => $up->user->phone ?? '-',
+                'plan_name' => $up->plan->name ?? '-',
+                'commitment' => $up->yearly_amount,
+                'paid' => $totalPaid,
+                'due' => $up->dueAmount(),
+            ];
+        });
+
+        $data = [
+            'org_name' => 'Bazm-e-Haidri',
+            'org_address' => 'NGO Address, City, State, India',
+            'org_phone' => '+91 90000 00000',
+            'org_email' => 'info@bazm-e-haidri.org',
+            'issued_date' => now()->format('d M Y'),
+            'user_plans' => $userPlans,
+            'total_commitment' => $userPlans->sum('commitment'),
+            'total_paid' => $userPlans->sum('paid'),
+            'total_due' => $userPlans->sum('due'),
+        ];
+
+        $pdf = Pdf::loadView('pdf.all-commitments', $data)->setPaper('a4');
+        return $pdf->download('User-Commitments-Report-' . now()->format('Y-m-d') . '.pdf');
     }
 }

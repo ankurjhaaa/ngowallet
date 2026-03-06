@@ -147,6 +147,14 @@ export default function Transactions() {
                       )}
                     </button>
                   </SheetTrigger>
+                  <a
+                    href="/admin/transactions/download-pdf"
+                    target="_blank"
+                    className="flex items-center gap-2 h-8 px-3 rounded-md bg-red-600 text-white text-[10px] font-bold hover:bg-red-700 transition active:scale-95 shadow-md"
+                  >
+                    <i className="fas fa-file-pdf"></i>
+                    PDF
+                  </a>
                   <SheetContent side="bottom" className="rounded-t-[24px] p-0 border-none px-6 pb-12 pt-2 ring-1 ring-black/5 bg-white">
                     <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-6"></div>
                     <SheetHeader className="mb-6">
@@ -215,6 +223,14 @@ export default function Transactions() {
                 </select>
                 <button onClick={applyFilters} className="h-8 px-4 rounded-md bg-red-600 text-white text-[10px] font-bold">Apply</button>
                 <button onClick={clearFilters} className="h-8 px-4 rounded-md bg-slate-200 text-slate-600 text-[10px] font-bold">Reset</button>
+                <a
+                  href="/admin/transactions/download-pdf"
+                  target="_blank"
+                  className="h-8 px-4 rounded-md bg-emerald-600 text-white text-[10px] font-bold flex items-center justify-center gap-2 shadow-md hover:bg-emerald-700 transition active:scale-95"
+                >
+                  <i className="fas fa-file-pdf"></i>
+                  Download PDF
+                </a>
               </div>
             </div>
           </div>

@@ -28,6 +28,7 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/expense', 'expense')->name('expense');
     Route::post('/add-expenses', 'addexpense')->name('addexpense');
     Route::get('/transactions', 'transactions')->name('transactions');
+    Route::get('/transactions/download-pdf', 'downloadCommitmentsPdf')->name('transactions.download-pdf');
     Route::post('/transactions/{payment}/send-message', 'sendMembershipMessage')->name('transactions.sendmessage');
     Route::get('/add-member-page', 'addmemberpage')->name('addmemberpage');
     Route::post('/add-member', 'addmember')->name('addmember');
