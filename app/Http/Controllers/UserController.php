@@ -14,41 +14,6 @@ use Inertia\Inertia;
 
 class UserController extends Controller
 {
-    public function home()
-    {
-        $fund_raised = Payment::sum('amount');
-        $totalSpent = Spend::sum('amount');
-        $totalBalance = $fund_raised - $totalSpent;
-        $totalDoner = User::whereHas('userPlans.payments', function ($query) {
-            $query->where('amount', '>', 0);
-        })->count();
-        return Inertia::render('public/home', [
-            'fund_raised' => $fund_raised,
-            'totalSpent' => $totalSpent,
-            'totalBalance' => $totalBalance,
-            'totalDoner' => $totalDoner,
-        ]);
-    }
-    public function programs()
-    {
-        return Inertia::render('public/programs');
-    }
-    public function vision()
-    {
-        return Inertia::render('public/vision');
-    }
-    public function join()
-    {
-        return Inertia::render('public/join');
-    }
-    public function privacyPolicy()
-    {
-        return Inertia::render('public/privacy-policy');
-    }
-    public function accountDeletion()
-    {
-        return Inertia::render('public/account-deletion');
-    }
     public function login()
     {
         return Inertia::render('auth/login');
@@ -74,12 +39,11 @@ class UserController extends Controller
                     'name' => $up->plan?->name,
                     'yearly_amount' => $up->yearly_amount,
                     'due_amount' => $up->dueAmount(),
-                    'pending_amount' => max(0,$up->dueAmount()),
+                    'pending_amount' => max(0, $up->dueAmount()),
                     'start_date' => $up->start_date,
                     'end_date' => $up->end_date,
                     'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
-                    'payments' => $up->payments()->latest()->get()->
-                        map(function ($payment) {
+                    'payments' => $up->payments()->latest()->get()->map(function ($payment) {
                             return [
                                 'amount' => $payment->amount,
                                 'payment_date' => $payment->payment_date,
