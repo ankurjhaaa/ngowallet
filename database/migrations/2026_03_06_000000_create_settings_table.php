@@ -15,13 +15,6 @@ return new class extends Migration {
             $table->timestamps();
         });
 
-        // seed some defaults
-        DB::table('settings')->insert([
-            ['key' => 'ngo_name', 'value' => 'Bazm-e-Haidri', 'type' => 'string', 'created_at' => now(), 'updated_at' => now()],
-            ['key' => 'ngo_email', 'value' => 'info@bazm-e-haidri.org', 'type' => 'string', 'created_at' => now(), 'updated_at' => now()],
-            ['key' => 'ngo_phone', 'value' => '+91 90000 00000', 'type' => 'string', 'created_at' => now(), 'updated_at' => now()],
-            ['key' => 'ngo_address', 'value' => 'NGO Address, City, State, India', 'type' => 'string', 'created_at' => now(), 'updated_at' => now()],
-        ]);
     }
 
     public function down(): void

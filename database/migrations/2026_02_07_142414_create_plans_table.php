@@ -17,11 +17,7 @@ return new class extends Migration {
             $table->integer('duration_years')->default(1);
             $table->timestamps();
         });
-        DB::table('plans')->insert([
-            ['name' => 'Basic', 'yearly_amount' => 3000, 'duration_years' => 1],
-            ['name' => 'Standard', 'yearly_amount' => 4000, 'duration_years' => 1],
-            ['name' => 'Premium', 'yearly_amount' => 5000, 'duration_years' => 1],
-        ]);
+      
     }
 
     /**
