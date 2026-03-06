@@ -24,6 +24,7 @@ export default function Transactions() {
     const [memberSearch, setMemberSearch] = useState(filters.member_query || "");
     const [openMemberModal, setOpenMemberModal] = useState(Boolean(filters.open_member_modal));
     const [sendingId, setSendingId] = useState(null);
+    const [showMobileFilters, setShowMobileFilters] = useState(false);
 
     const buildFilterParams = (overrides = {}) => {
         const merged = {
@@ -49,6 +50,7 @@ export default function Transactions() {
             preserveState: true,
             replace: true,
         });
+        setShowMobileFilters(false); // Close mobile filters after applying
     };
 
     const clearFilters = () => {
@@ -65,6 +67,7 @@ export default function Transactions() {
 
         setMemberId("");
         setMemberLabel("");
+        setShowMobileFilters(false); // Close mobile filters after clearing
     };
 
     const selectMember = (member) => {
@@ -121,22 +124,34 @@ export default function Transactions() {
                             </p>
                         </div>
                         <div className="flex gap-2">
-                            {/* future action buttons can live here */}
+                            {/* Mobile Filter Toggle */}
+                            <button
+                                onClick={() => setShowMobileFilters(!showMobileFilters)}
+                                className="sm:hidden flex items-center gap-2 h-9 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition relative"
+                            >
+                                <i className={`fas fa-filter text-xs`}></i>
+                                {showMobileFilters ? 'Hide Filters' : 'Filters'}
+                                {(query || memberId || paymentMode !== 'all' || planId !== 'all' || from || to) && (
+                                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-amber-400 rounded-full text-[10px] font-bold text-gray-900 flex items-center justify-center">
+                                        !
+                                    </span>
+                                )}
+                            </button>
                         </div>
                     </div>
                     {/* FILTERS */}
-                    <div className="border-t border-gray-100 p-4 sm:p-5">
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-3">
+                    <div className={`border-t border-gray-100 overflow-hidden transition-all duration-300 ${showMobileFilters ? 'max-h-[2000px] p-3 sm:p-5' : 'max-h-0 sm:max-h-none p-0 sm:p-5'} sm:block`}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
                             <input
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 placeholder="Search by amount / member"
-                                className=" w-full h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                                className="w-full h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
                             />
 
                             <button
                                 onClick={() => setOpenMemberModal(true)}
-                                className="h-10 rounded-md border border-gray-200 px-3 text-sm text-left text-gray-700 bg-white hover:bg-gray-50 transition"
+                                className="h-10 rounded-md border border-gray-200 px-3 text-sm text-left text-gray-700 bg-white hover:bg-gray-50 transition truncate"
                             >
                                 {memberLabel || "Select Member"}
                             </button>
@@ -164,28 +179,28 @@ export default function Transactions() {
                                 ))}
                             </select>
 
-
                             <input
                                 type="date"
                                 value={from}
                                 onChange={(e) => setFrom(e.target.value)}
-                                className="h-10 rounded-md border border-gray-200 px-3 text-xs sm:text-sm"
+                                placeholder="From Date"
+                                className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
                             />
                             <input
                                 type="date"
                                 value={to}
                                 onChange={(e) => setTo(e.target.value)}
-                                className="h-10 rounded-md border border-gray-200 px-3 text-xs sm:text-sm"
+                                placeholder="To Date"
+                                className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
                             />
-
                         </div>
 
-                        <div className="flex flex-wrap gap-2 mt-3">
+                        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 mt-3">
                             <button
                                 onClick={applyFilters}
                                 className="h-9 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition cursor-pointer"
                             >
-                                Apply Filters
+                                Apply
                             </button>
                             <button
                                 onClick={clearFilters}
@@ -196,7 +211,7 @@ export default function Transactions() {
                             {memberId && (
                                 <button
                                     onClick={clearMemberFilter}
-                                    className="h-9 px-4 rounded-md bg-amber-50 text-amber-700 text-sm font-medium hover:bg-amber-100 transition cursor-pointer"
+                                    className="h-9 px-4 rounded-md bg-amber-50 text-amber-700 text-sm font-medium hover:bg-amber-100 transition cursor-pointer col-span-2 sm:col-span-1"
                                 >
                                     Clear Member
                                 </button>
@@ -207,6 +222,11 @@ export default function Transactions() {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                {/* Mobile scroll hint */}
+                <div className="sm:hidden bg-amber-50 border-b border-amber-100 px-3 py-2 text-xs text-amber-700 flex items-center gap-2">
+                    <i className="fas fa-arrows-alt-h"></i>
+                    <span>Scroll horizontally to view all columns</span>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full min-w-[980px] text-sm">
                         <thead className="bg-gray-50 text-gray-600">
@@ -271,14 +291,14 @@ export default function Transactions() {
                 </div>
             </div>
 
-            <div className="mt-5 flex justify-end gap-1 flex-wrap">
+            <div className="mt-5 flex justify-center sm:justify-end gap-1 flex-wrap">
                 {payments.links.map((link, index) => (
                     <button
                         key={index}
                         disabled={!link.url}
                         onClick={() => link.url && router.get(link.url, {}, { preserveState: true, preserveScroll: true })}
                         className={`
-                            min-w-[36px] h-9 px-3 rounded-md text-sm transition
+                            min-w-[32px] sm:min-w-[36px] h-8 sm:h-9 px-2 sm:px-3 rounded-md text-xs sm:text-sm transition
                             ${link.active ? "bg-red-800 text-white" : "bg-white text-gray-600 hover:bg-red-50"}
                             ${!link.url ? "opacity-40 cursor-not-allowed" : ""}
                         `}
@@ -298,7 +318,7 @@ export default function Transactions() {
                             </button>
                         </div>
 
-                        <div className="flex gap-2 mb-3">
+                        <div className="flex flex-col sm:flex-row gap-2 mb-3">
                             <input
                                 value={memberSearch}
                                 onChange={(e) => setMemberSearch(e.target.value)}
@@ -307,7 +327,7 @@ export default function Transactions() {
                             />
                             <button
                                 onClick={searchMembers}
-                                className="h-10 px-4 rounded-md bg-red-800 text-white text-sm font-medium"
+                                className="h-10 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition"
                             >
                                 Search
                             </button>
@@ -330,7 +350,7 @@ export default function Transactions() {
                             )}
                         </div>
 
-                        <div className="mt-3 flex justify-end gap-1 flex-wrap">
+                        <div className="mt-3 flex justify-center sm:justify-end gap-1 flex-wrap">
                             {members.links.map((link, index) => (
                                 <button
                                     key={index}
@@ -340,7 +360,7 @@ export default function Transactions() {
                                         router.get(link.url, {}, { preserveState: true, replace: true });
                                     }}
                                     className={`
-                                        min-w-[34px] h-8 px-2 rounded text-xs transition
+                                        min-w-[28px] sm:min-w-[34px] h-7 sm:h-8 px-1.5 sm:px-2 rounded text-xs transition
                                         ${link.active ? "bg-red-800 text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
                                         ${!link.url ? "opacity-40 cursor-not-allowed" : ""}
                                     `}
