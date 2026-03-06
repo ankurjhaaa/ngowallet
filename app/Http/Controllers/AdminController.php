@@ -146,12 +146,12 @@ class AdminController extends Controller
                         'status' => $up->status,
                         'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
                         'payments' => $up->payments()->latest()->get()->map(function ($payment) {
-                                return [
-                                    'amount' => $payment->amount,
-                                    'payment_date' => $payment->payment_date,
-                                    'payment_mode' => $payment->payment_mode,
-                                ];
-                            }),
+                            return [
+                                'amount' => $payment->amount,
+                                'payment_date' => $payment->payment_date,
+                                'payment_mode' => $payment->payment_mode,
+                            ];
+                        }),
                     ];
                 }),
             'due_plans' => UserPlan::with('plan')
@@ -170,12 +170,12 @@ class AdminController extends Controller
                         'status' => $up->status,
                         'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
                         'payments' => $up->payments()->latest()->get()->map(function ($payment) {
-                                return [
-                                    'amount' => $payment->amount,
-                                    'payment_date' => $payment->payment_date,
-                                    'payment_mode' => $payment->payment_mode,
-                                ];
-                            }),
+                            return [
+                                'amount' => $payment->amount,
+                                'payment_date' => $payment->payment_date,
+                                'payment_mode' => $payment->payment_mode,
+                            ];
+                        }),
                     ];
                 })
         ]);
@@ -264,7 +264,49 @@ class AdminController extends Controller
         $planId = $request->input('plan_id', 'all');
         $from = $request->input('from');
         $to = $request->input('to');
+        $dateFilter = $request->input('date_filter', 'all');
         $memberQuery = trim((string) $request->input('member_query', ''));
+
+        if ($dateFilter && $dateFilter !== 'all') {
+            switch ($dateFilter) {
+                case 'today':
+                    $from = now()->startOfDay();
+                    $to = now()->endOfDay();
+                    break;
+                case 'this_week':
+                    $from = now()->startOfWeek();
+                    $to = now()->endOfWeek();
+                    break;
+                case 'last_week':
+                    $from = now()->subWeek()->startOfWeek();
+                    $to = now()->subWeek()->endOfWeek();
+                    break;
+                case 'this_month':
+                    $from = now()->startOfMonth();
+                    $to = now()->endOfMonth();
+                    break;
+                case 'last_month':
+                    $from = now()->subMonth()->startOfMonth();
+                    $to = now()->subMonth()->endOfMonth();
+                    break;
+                case 'last_3_months':
+                    $from = now()->subMonths(3)->startOfDay();
+                    $to = now()->endOfDay();
+                    break;
+                case 'last_6_months':
+                    $from = now()->subMonths(6)->startOfDay();
+                    $to = now()->endOfDay();
+                    break;
+                case 'this_year':
+                    $from = now()->startOfYear();
+                    $to = now()->endOfYear();
+                    break;
+                case 'last_year':
+                    $from = now()->subYear()->startOfYear();
+                    $to = now()->subYear()->endOfYear();
+                    break;
+            }
+        }
 
         $payments = Payment::query()
             ->with([
@@ -329,6 +371,7 @@ class AdminController extends Controller
                 'plan_id' => $planId,
                 'from' => $from,
                 'to' => $to,
+                'date_filter' => $dateFilter,
                 'member_query' => $memberQuery,
                 'open_member_modal' => (bool) $request->boolean('open_member_modal'),
             ],
