@@ -574,11 +574,14 @@ function EditUserModal({ user, onClose }) {
 
                     {/* PHONE */}
                     <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Phone (10 digits)</label>
                         <input
-                            type="text"
+                            type="tel"
                             value={data.phone}
-                            onChange={e => setData("phone", e.target.value)}
+                            onChange={e => setData("phone", e.target.value.replace(/\D/g, ''))}
+                            placeholder="9876543210"
+                            maxLength="10"
+                            pattern="[6-9][0-9]{9}"
                             className="w-full h-10 px-3 rounded-md border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
                         />
                         {errors.phone && <p className="text-xs text-red-700 mt-1">{errors.phone}</p>}

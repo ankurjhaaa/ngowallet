@@ -91,11 +91,14 @@ export default function AddMember() {
 
                     {/* PHONE */}
                     <div>
-                        <label className="form-label">Phone</label>
+                        <label className="form-label">Phone (10 digits)</label>
                         <input
-                            type="text"
+                            type="tel"
                             value={data.phone}
-                            onChange={e => setData("phone", e.target.value)}
+                            onChange={e => setData("phone", e.target.value.replace(/\D/g, ''))}
+                            placeholder="9876543210"
+                            maxLength="10"
+                            pattern="[6-9][0-9]{9}"
                             className="form-input"
                         />
                         {errors.phone && <p className="error">{errors.phone}</p>}

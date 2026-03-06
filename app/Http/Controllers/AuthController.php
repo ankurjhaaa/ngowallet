@@ -31,7 +31,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'phone' => 'required|unique:users,phone',
+            'phone' => 'required|numeric|digits:10|regex:/^[6-9][0-9]{9}$/|unique:users,phone',
             'password' => 'required|min:6',
         ]);
         $user = User::create([

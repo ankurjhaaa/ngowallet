@@ -98,7 +98,7 @@ export default function Plans() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="flex items-center justify-end gap-3 opacity-0 opacity-100 transition-opacity">
                                                 <button
                                                     onClick={() => openEdit(plan)}
                                                     className="h-8 w-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-red-800 hover:bg-red-800 hover:text-white transition shadow-sm"
@@ -106,13 +106,7 @@ export default function Plans() {
                                                 >
                                                     <i className="fas fa-edit text-xs"></i>
                                                 </button>
-                                                {/* <button
-                                                    onClick={() => setDeletingId(plan.id)}
-                                                    className="h-8 w-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-red-600 hover:text-white transition shadow-sm"
-                                                    title="Delete Plan"
-                                                >
-                                                    <i className="fas fa-trash-alt text-xs"></i>
-                                                </button> */}
+                                                
                                             </div>
                                         </td>
                                     </tr>

@@ -304,7 +304,6 @@ class AdminController extends Controller
             ->withQueryString();
 
         $members = User::query()
-            ->where('role', 'member')
             ->when($memberQuery, function ($query) use ($memberQuery) {
                 $query->where(function ($inner) use ($memberQuery) {
                     $inner->where('name', 'like', "%{$memberQuery}%")
@@ -425,7 +424,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'nickname' => 'nullable|string|max:255',
             'email' => 'nullable',
-            'phone' => 'required|max:20|unique:users',
+            'phone' => 'required|numeric|digits:10|regex:/^[6-9][0-9]{9}$/|unique:users',
             'password' => 'required',
             'role' => 'nullable',
             'gender' => 'nullable',
@@ -587,7 +586,7 @@ class AdminController extends Controller
             'name' => 'required|string|max:255',
             'nickname' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
-            'phone' => 'required|max:20|unique:users,phone,' . $id,
+            'phone' => 'required|numeric|digits:10|regex:/^[6-9][0-9]{9}$/|unique:users,phone,' . $id,
             'role' => 'required|in:admin,user,member',
             'status' => 'required|in:active,inactive',
             'gender' => 'nullable|in:male,female,other',

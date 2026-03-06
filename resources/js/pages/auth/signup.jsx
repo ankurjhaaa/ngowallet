@@ -68,13 +68,15 @@ export default function Signup() {
                         {/* Phone */}
                         <div>
                             <label className="text-sm text-gray-600">
-                                Phone Number
+                                Phone Number (10 digits)
                             </label>
                             <input
                                 type="tel"
                                 value={data.phone}
-                                onChange={e => setData('phone', e.target.value)}
-                                placeholder="Enter phone number"
+                                onChange={e => setData('phone', e.target.value.replace(/\D/g, ''))}
+                                placeholder="9876543210"
+                                maxLength="10"
+                                pattern="[6-9][0-9]{9}"
                                 className="mt-1 w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 bg-gray-50"
                             />
                             {errors.phone && <div className="text-red-600 text-sm mt-1">{errors.phone}</div>}
