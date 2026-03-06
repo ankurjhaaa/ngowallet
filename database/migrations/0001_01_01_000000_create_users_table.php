@@ -28,35 +28,6 @@ return new class extends Migration {
             $table->rememberToken();
             $table->timestamps();
         });
-        DB::table('users')->insert([
-            [
-                'name' => 'Admin User',
-                'nickname' => 'Admin',
-                'phone' => '7763972896',
-                'password' => Hash::make('password'),
-                'role' => 'admin',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Normal User',
-                'nickname' => 'Normal',
-                'phone' => '2222222222',
-                'password' => Hash::make('password'),
-                'role' => 'user',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Member User',
-                'nickname' => 'Member',
-                'phone' => '3333333333',
-                'password' => Hash::make('password'),
-                'role' => 'member',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-        ]);
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

@@ -1,272 +1,329 @@
-import PublicLayout from "@/layouts/PublicLayout";
-import { Head, Link } from "@inertiajs/react";
-import { useLanguage } from "@/contexts/LanguageContext";
+import PublicLayout from"@/layouts/PublicLayout";
+import { Head, Link } from"@inertiajs/react";
+import { useLanguage } from"@/contexts/LanguageContext";
+import { Button } from"@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
+import { Badge } from"@/components/ui/badge";
+import { motion } from"framer-motion";
+import { ArrowRight, Heart, Users, Calendar, Globe, Landmark, BookOpen, MapPin, Feather, Crown, Scale, Globe2, HandHeart, Sword } from"lucide-react";
+import { cn } from"@/lib/utils";
+
+const fadeInUp = {
+ initial: { opacity: 0, y: 20 },
+ whileInView: { opacity: 1, y: 0 },
+ viewport: { once: true },
+ transition: { duration: 0.6 }
+};
+
+const staggerContainer = {
+ initial: {},
+ whileInView: { transition: { staggerChildren: 0.1 } }
+};
 
 export default function Home() {
-  return (
-    <PublicLayout>
-      <HomeContent />
-    </PublicLayout>
-  );
+ const { t, lang } = useLanguage();
+ const isRtl = lang ==="ur";
+
+ return (
+ <PublicLayout>
+ <Head title="Bazm-e-Haidri — Purnea"/>
+
+ {/* Hero Section */}
+ <section className="relative min-h-[85vh] flex items-center overflow-hidden">
+ {/* Background Layer */}
+ <div className="absolute inset-0 z-0">
+ <img
+ src="/images/karbhala_hero.png"
+ alt="Bazm-e-Haidri Hero"
+ className="w-full h-full object-cover object-center scale-105"
+ />
+ <div className="absolute inset-0 bg-emerald-950/95"/>
+ <div className="absolute inset-x-0 bottom-0 h-32 bg-slate-50"/>
+ </div>
+
+ <div className="container mx-auto px-4 sm:px-4 relative z-10 pt-16 md:pt-24 pb-32">
+ <motion.div
+ initial={{ opacity: 0, x: -30 }}
+ animate={{ opacity: 1, x: 0 }}
+ transition={{ duration: 0.8 }}
+ className="max-w-3xl text-left rtl:text-right"
+ >
+ <Badge variant="secondary"className="bg-emerald-400/20 text-emerald-300 border-none px-4 py-1.5 mb-4 backdrop-blur-md">
+ <span className="flex items-center gap-2">
+ <Heart className="h-3 w-3 fill-emerald-300"/>
+ {t.heroQuote}
+ </span>
+ </Badge>
+
+ <h1 className="text-4xl md:text-7xl font-extrabold text-white leading-[1.1] tracking-tight mb-4">
+ {t.heroTitle}
+ </h1>
+ <p className="text-xl md:text-2xl text-emerald-100/90 font-medium mb-4">
+ {t.heroSubtitle}
+ </p>
+ <p className="text-base md:text-lg text-emerald-100/70 max-w-xl leading-relaxed mb-10">
+ {t.heroDesc}
+ </p>
+
+ <div className="flex flex-col sm:flex-row gap-4">
+ <Button asChild size="lg"className="rounded-md h-14 px-4 text-base group">
+ <Link href="/join">
+ {t.heroCta1}
+ <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1"/>
+ </Link>
+ </Button>
+ <Button asChild variant="outline"size="lg"className="rounded-md h-14 px-4 text-base border-white/20 bg-white/5 text-white backdrop-blur-md hover:bg-white/10 hover:border-white/40">
+ <Link href="/vision">
+ {t.heroCta2}
+ </Link>
+ </Button>
+ </div>
+ </motion.div>
+ </div>
+
+ {/* Decorative Wave */}
+ <div className="absolute bottom-0 left-0 right-0 z-10">
+ <svg viewBox="0 0 1440 120"fill="none"className="w-full text-slate-50 translate-y-1">
+ <path d="M0,64L40,69.3C80,75,160,85,240,80C320,75,400,53,480,42.7C560,32,640,32,720,37.3C800,43,880,53,960,69.3C1040,85,1120,107,1200,106.7C1280,107,1360,85,1400,74.7L1440,64L1440,120L1400,120C1360,120,1280,120,1200,120C1120,120,1040,120,960,120C880,120,800,120,720,120C640,120,560,120,480,120C400,120,320,120,240,120C160,120,80,120,40,120L0,120Z"fill="currentColor"></path>
+ </svg>
+ </div>
+ </section>
+
+ {/* Purnea History Section */}
+ <section className="bg-slate-50 py-4 relative overflow-hidden">
+ <div className="container mx-auto px-4 sm:px-4 relative z-10">
+ <div className="flex flex-col lg:flex-row gap-16 items-center">
+ <motion.div
+ {...fadeInUp}
+ className="lg:w-1/2"
+ >
+ <Badge variant="outline"className="border-emerald-200 text-emerald-800 uppercase tracking-widest text-[10px] font-bold px-3 py-1 mb-4 rounded-md">
+ {t.historyTag}
+ </Badge>
+ <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+ {t.historyTitle} <span className="text-emerald-700">{t.historyHighlight}</span>
+ </h2>
+ <div className="space-y-6">
+ <HistoryFeature icon={<Landmark className="h-6 w-6"/>} title={t.historyAncientTitle} desc={t.historyAncientDesc} />
+ <HistoryFeature icon={<BookOpen className="h-6 w-6"/>} title={t.historyCultureTitle} desc={t.historyCultureDesc} />
+ <HistoryFeature icon={<MapPin className="h-6 w-6"/>} title={t.historyGeoTitle} desc={t.historyGeoDesc} />
+ </div>
+ </motion.div>
+
+ <motion.div
+ initial={{ opacity: 0, scale: 0.95 }}
+ whileInView={{ opacity: 1, scale: 1 }}
+ viewport={{ once: true }}
+ transition={{ duration: 0.8 }}
+ className="lg:w-1/2 relative group"
+ >
+ <div className="relative z-10 rounded-md overflow-hidden border-4 border-white transform transition-transform group-hover:rotate-1">
+ <img
+ src="/images/purnea_heritage.png"
+ alt="Purnea Heritage"
+ className="w-full aspect-[4/3] object-cover"
+ />
+ </div>
+ <div className="absolute -top-6 -right-6 w-64 h-64 bg-emerald-100 rounded-md blur-3xl opacity-50 -z-0"/>
+ <div className="absolute -bottom-6 -left-6 w-64 h-64 bg-blue-100 rounded-md blur-3xl opacity-50 -z-0"/>
+ </motion.div>
+ </div>
+ </div>
+ </section>
+
+ {/* Stats Counter Section */}
+ <section className="bg-emerald-900 py-4 text-white overflow-hidden">
+ <div className="container mx-auto px-4 sm:px-4">
+ <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-4">
+ <ImpactStat value="120+"label={t.impactPrograms} icon={<Globe className="h-6 w-6 opacity-30"/>} />
+ <ImpactStat value="35+"label={t.impactVillages} icon={<MapPin className="h-6 w-6 opacity-30"/>} />
+ <ImpactStat value="500+"label={t.impactVolunteers} icon={<Users className="h-6 w-6 opacity-30"/>} />
+ <ImpactStat value="5+"label={t.impactYears} icon={<Calendar className="h-6 w-6 opacity-30"/>} />
+ </div>
+ </div>
+ </section>
+
+ {/* Great Personalities Section */}
+ <section className="bg-white py-4">
+ <div className="container mx-auto px-4 sm:px-4 text-center mb-10">
+ <Badge variant="outline"className="border-emerald-200 text-emerald-800 uppercase tracking-widest text-[10px] font-bold px-3 py-1 mb-4 rounded-md">
+ {t.personalitiesTag}
+ </Badge>
+ <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+ {t.personalitiesTitle} <span className="text-emerald-700">{t.personalitiesHighlight}</span>
+ </h2>
+ <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
+ {t.personalitiesSubtitle}
+ </p>
+ </div>
+
+ <div className="container mx-auto px-4 sm:px-4">
+ <motion.div
+ variants={staggerContainer}
+ initial="initial"
+ whileInView="whileInView"
+ viewport={{ once: true }}
+ className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+ >
+ <PersonCard name={t.personRenuName} title={t.personRenuTitle} desc={t.personRenuDesc} icon={<Feather className="h-5 w-5"/>} color="bg-orange-50 text-orange-600"/>
+ <PersonCard name={t.personMaharajaName} title={t.personMaharajaTitle} desc={t.personMaharajaDesc} icon={<Crown className="h-5 w-5"/>} color="bg-amber-50 text-amber-600"/>
+ <PersonCard name={t.personSinhaName} title={t.personSinhaTitle} desc={t.personSinhaDesc} icon={<Scale className="h-5 w-5"/>} color="bg-blue-50 text-blue-600"/>
+ <PersonCard name={t.personRahulName} title={t.personRahulTitle} desc={t.personRahulDesc} icon={<Globe2 className="h-5 w-5"/>} color="bg-emerald-50 text-emerald-600"/>
+ <PersonCard name={t.personSaintName} title={t.personSaintTitle} desc={t.personSaintDesc} icon={<HandHeart className="h-5 w-5"/>} color="bg-purple-50 text-purple-600"/>
+ <PersonCard name={t.personFreedomName} title={t.personFreedomTitle} desc={t.personFreedomDesc} icon={<Sword className="h-5 w-5"/>} color="bg-rose-50 text-rose-600"/>
+ </motion.div>
+ </div>
+ </section>
+
+ {/* Mission Section */}
+ <section className="bg-slate-50 py-4 border-y border-slate-200">
+ <div className="container mx-auto px-4 sm:px-4 text-center mb-10">
+ <Badge variant="outline"className="border-emerald-200 text-emerald-800 uppercase tracking-widest text-[10px] font-bold px-3 py-1 mb-4 rounded-md">
+ {t.missionTag}
+ </Badge>
+ <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">
+ {t.missionTitle} <span className="text-emerald-700">{t.missionHighlight}</span>
+ </h2>
+ <p className="text-slate-500 max-w-2xl mx-auto text-lg leading-relaxed">
+ {t.missionSubtitle}
+ </p>
+ </div>
+
+ <div className="container mx-auto px-4 sm:px-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+ <MissionItem icon={<Globe className="h-10 w-10"/>} title={t.missionEduTitle} desc={t.missionEduDesc} percent="45%"color="bg-emerald-600"/>
+ <MissionItem icon={<Users className="h-10 w-10"/>} title={t.missionHealthTitle} desc={t.missionHealthDesc} percent="35%"color="bg-blue-600"/>
+ <MissionItem icon={<Heart className="h-10 w-10"/>} title={t.missionCommunityTitle} desc={t.missionCommunityDesc} percent="20%"color="bg-rose-600"/>
+ </div>
+ </section>
+
+ {/* Call to Action Section */}
+ <section className="py-4 relative overflow-hidden">
+ <div className="absolute inset-0 bg-emerald-900">
+ <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+ <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-emerald-950"></div>
+ </div>
+
+ <div className="container mx-auto px-4 sm:px-4 relative z-10 text-center">
+ <motion.div
+ {...fadeInUp}
+ className="max-w-4xl mx-auto"
+ >
+ <p className="text-emerald-300 font-medium mb-4 italic tracking-wide">
+ {t.ctaQuote}
+ </p>
+ <h2 className="text-3xl md:text-6xl font-extrabold text-white mb-5 tracking-tight leading-tight">
+ {t.ctaTitle}
+ </h2>
+ <p className="text-lg md:text-xl text-emerald-100/70 mb-5 max-w-2xl mx-auto leading-relaxed">
+ {t.ctaDesc}
+ </p>
+
+ <div className="flex flex-col sm:flex-row gap-3 justify-center">
+ <Button asChild size="lg"className="rounded-md h-16 px-10 text-lg bg-white text-emerald-900 hover:bg-emerald-50 transition-all hover:scale-[1.02] active:scale-[0.98]">
+ <Link href="/join">
+ <Heart className="mr-2 h-6 w-6 fill-emerald-900"/>
+ {t.ctaCta1}
+ </Link>
+ </Button>
+ <Button asChild variant="outline"size="lg"className="rounded-md h-16 px-10 text-lg border-white/30 text-white hover:bg-white/10 backdrop-blur-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+ <Link href="/join">
+ {t.ctaCta2}
+ </Link>
+ </Button>
+ </div>
+ </motion.div>
+ </div>
+ </section>
+ </PublicLayout>
+ );
 }
 
-function HomeContent() {
-  const { t } = useLanguage();
+{/* Helper Components */}
 
-  return (
-    <>
-      <Head title="Bazm-e-Haidri — Purnea" />
-
-      {/* ============================================================
-                HERO
-            ============================================================ */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0">
-          <img src="/images/karbhala_hero.png" alt="Bazm-e-Haidri" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/70 via-emerald-900/50 to-emerald-950/80" />
-        </div>
-
-        <div className="relative max-w-7xl mx-auto px-4 pt-20 pb-24 md:pt-32 md:pb-36 text-center">
-          <p className="text-emerald-300 text-sm md:text-base tracking-wide font-medium mb-4 italic">
-            "{t.heroQuote}"
-          </p>
-          <h1 className="text-3xl md:text-6xl font-bold text-white leading-tight">
-            {t.heroTitle}
-          </h1>
-          <p className="text-emerald-200 text-lg md:text-2xl font-medium mt-2">
-            {t.heroSubtitle}
-          </p>
-          <p className="mt-5 text-white/75 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-            {t.heroDesc}
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-            <Link href="/join" className="bg-emerald-500 text-white px-7 py-3 rounded-lg font-semibold text-sm hover:bg-emerald-400 transition shadow-lg">
-              <i className="fas fa-hands-helping mr-2"></i>{t.heroCta1}
-            </Link>
-            <Link href="/vision" className="border border-white/40 text-white px-7 py-3 rounded-lg font-medium text-sm hover:bg-white/10 transition">
-              {t.heroCta2}
-            </Link>
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 60" fill="none" className="w-full">
-            <path d="M0,40 C360,80 720,0 1080,40 C1260,60 1380,20 1440,30 L1440,60 L0,60 Z" fill="#f0fdf4" />
-          </svg>
-        </div>
-      </section>
-
-      {/* ============================================================
-                PURNEA HISTORY
-            ============================================================ */}
-      <section className="bg-green-50 py-14 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <p className="text-xs tracking-[0.25em] uppercase text-emerald-700 font-semibold mb-2">{t.historyTag}</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t.historyTitle} <span className="text-emerald-700">{t.historyHighlight}</span>
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="rounded-xl overflow-hidden shadow-lg border border-emerald-200">
-              <img src="/images/purnea_heritage.png" alt="Heritage" className="w-full h-64 md:h-80 object-cover" />
-            </div>
-            <div className="space-y-4">
-              <HistoryItem icon="fa-landmark" title={t.historyAncientTitle} desc={t.historyAncientDesc} />
-              <HistoryItem icon="fa-book-open" title={t.historyCultureTitle} desc={t.historyCultureDesc} />
-              <HistoryItem icon="fa-map-marked-alt" title={t.historyGeoTitle} desc={t.historyGeoDesc} />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-                GREAT PERSONALITIES
-            ============================================================ */}
-      <section className="bg-white py-14 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <p className="text-xs tracking-[0.25em] uppercase text-emerald-700 font-semibold mb-2">{t.personalitiesTag}</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t.personalitiesTitle} <span className="text-emerald-700">{t.personalitiesHighlight}</span>
-            </h2>
-            <p className="text-gray-600 mt-3 max-w-xl mx-auto text-sm">{t.personalitiesSubtitle}</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            <PersonCard name={t.personRenuName} title={t.personRenuTitle} desc={t.personRenuDesc} icon="fa-feather-alt" initial="र" />
-            <PersonCard name={t.personMaharajaName} title={t.personMaharajaTitle} desc={t.personMaharajaDesc} icon="fa-crown" initial="म" />
-            <PersonCard name={t.personSinhaName} title={t.personSinhaTitle} desc={t.personSinhaDesc} icon="fa-balance-scale" initial="स" />
-            <PersonCard name={t.personRahulName} title={t.personRahulTitle} desc={t.personRahulDesc} icon="fa-globe-asia" initial="रा" />
-            <PersonCard name={t.personSaintName} title={t.personSaintTitle} desc={t.personSaintDesc} icon="fa-pray" initial="☪" />
-            <PersonCard name={t.personFreedomName} title={t.personFreedomTitle} desc={t.personFreedomDesc} icon="fa-fist-raised" initial="✦" />
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-                TIMELINE
-            ============================================================ */}
-      <section className="bg-green-50 py-14 md:py-20">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <p className="text-xs tracking-[0.25em] uppercase text-emerald-700 font-semibold mb-2">{t.timelineTag}</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t.timelineTitle} <span className="text-emerald-700">{t.timelineHighlight}</span>
-            </h2>
-          </div>
-          <div className="relative">
-            <div className="absolute left-5 md:left-6 top-0 bottom-0 w-0.5 bg-emerald-200" />
-            <div className="space-y-6">
-              <TimelineItem era="Ancient Era" year="600 BCE" text="Part of the Anga Mahajanapada — a thriving cultural and trade center." />
-              <TimelineItem era="Maurya Period" year="320 BCE" text="Under Emperor Ashoka's empire. Widespread spread of Buddhism." />
-              <TimelineItem era="Gupta Period" year="320 CE" text="Golden age — unprecedented development in art, science, and literature." />
-              <TimelineItem era="Mughal Era" year="1500 CE" text="Establishment of Purnea Sarkar — growth as an administrative and trade center." />
-              <TimelineItem era="British Era" year="1770 CE" text="Formation of Purnea district. Beginning of modern development." />
-              <TimelineItem era="Independent India" year="1947" text="Purnea becomes a key district of Bihar. Rapid growth in education and agriculture." />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-                MISSION
-            ============================================================ */}
-      <section className="bg-white py-14 md:py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <p className="text-xs tracking-[0.25em] uppercase text-emerald-700 font-semibold mb-2">{t.missionTag}</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t.missionTitle} <span className="text-emerald-700">{t.missionHighlight}</span>
-            </h2>
-            <p className="text-gray-600 mt-3 max-w-xl mx-auto text-sm">{t.missionSubtitle}</p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <MissionCard icon="fa-graduation-cap" title={t.missionEduTitle} desc={t.missionEduDesc} percent="45%" />
-            <MissionCard icon="fa-hospital" title={t.missionHealthTitle} desc={t.missionHealthDesc} percent="35%" />
-            <MissionCard icon="fa-people-carry" title={t.missionCommunityTitle} desc={t.missionCommunityDesc} percent="20%" />
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-                IMPACT
-            ============================================================ */}
-      <section className="bg-green-50 py-14 md:py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-10">
-            <p className="text-xs tracking-[0.25em] uppercase text-emerald-700 font-semibold mb-2">{t.impactTag}</p>
-            <h2 className="text-2xl md:text-4xl font-bold text-gray-900">
-              {t.impactTitle} <span className="text-emerald-700">{t.impactHighlight}</span>
-            </h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <ImpactStat icon="fa-briefcase" value="120+" label={t.impactPrograms} />
-            <ImpactStat icon="fa-map-marked-alt" value="35+" label={t.impactVillages} />
-            <ImpactStat icon="fa-hands-helping" value="500+" label={t.impactVolunteers} />
-            <ImpactStat icon="fa-calendar-check" value="5+" label={t.impactYears} />
-          </div>
-        </div>
-      </section>
-
-      {/* ============================================================
-                CTA
-            ============================================================ */}
-      <section className="relative overflow-hidden py-16 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-800 via-emerald-900 to-emerald-950" />
-        <div className="relative max-w-7xl mx-auto px-4 text-center">
-          <p className="text-emerald-300 text-sm tracking-wide mb-3">{t.ctaQuote}</p>
-          <h2 className="text-2xl md:text-4xl font-bold text-white">{t.ctaTitle}</h2>
-          <p className="mt-4 text-emerald-100/70 max-w-md mx-auto text-sm">{t.ctaDesc}</p>
-          <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
-            <Link href="/join" className="bg-white text-emerald-800 px-7 py-3 rounded-lg font-semibold text-sm hover:bg-emerald-50 transition shadow-lg">
-              <i className="fas fa-heart mr-2"></i>{t.ctaCta1}
-            </Link>
-            <Link href="/join" className="border border-white/40 text-white px-7 py-3 rounded-lg font-medium text-sm hover:bg-white/10 transition">
-              {t.ctaCta2}
-            </Link>
-          </div>
-        </div>
-      </section>
-    </>
-  );
+function HistoryFeature({ icon, title, desc }) {
+ return (
+ <div className="flex items-start gap-4 group">
+ <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white text-emerald-700 group-hover:scale-110 transition-transform">
+ {icon}
+ </div>
+ <div className="flex-1 border-b border-slate-200 pb-5">
+ <h3 className="text-lg font-bold text-slate-800 mb-1">{title}</h3>
+ <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
+ </div>
+ </div>
+ );
 }
 
-/* ================================================================ COMPONENTS ================================================================ */
-
-function HistoryItem({ icon, title, desc }) {
-  return (
-    <div className="flex items-start gap-3 bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
-      <i className={`fas ${icon} text-emerald-700 mt-1`}></i>
-      <div>
-        <h3 className="font-bold text-gray-900">{title}</h3>
-        <p className="text-sm text-gray-600 mt-1">{desc}</p>
-      </div>
-    </div>
-  );
+function ImpactStat({ value, label, icon }) {
+ return (
+ <motion.div
+ {...fadeInUp}
+ className="text-center relative group"
+ >
+ <div className="mb-3 text-emerald-400 transform transition-transform group-hover:scale-110">
+ {icon}
+ </div>
+ <div className="text-3xl md:text-5xl font-extrabold mb-2 tracking-tight">
+ {value}
+ </div>
+ <div className="text-emerald-300/60 text-[10px] md:text-xs font-bold uppercase tracking-widest">
+ {label}
+ </div>
+ </motion.div>
+ );
 }
 
-function PersonCard({ name, title, desc, icon, initial }) {
-  return (
-    <div className="bg-white rounded-lg p-5 shadow-sm border border-emerald-100 hover:shadow-md transition">
-      <div className="flex items-center gap-3 mb-3">
-        <div className="w-11 h-11 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-lg font-bold shrink-0">
-          {initial}
-        </div>
-        <div>
-          <h3 className="font-bold text-gray-900 text-sm">{name}</h3>
-          <p className="text-xs text-emerald-700 font-medium">{title}</p>
-        </div>
-      </div>
-      <p className="text-sm text-gray-600 leading-relaxed">{desc}</p>
-    </div>
-  );
+function PersonCard({ name, title, desc, icon, color }) {
+ return (
+ <motion.div variants={fadeInUp}>
+ <Card className="h-full border-slate-100 hover:-900/5 transition-all transform hover:-translate-y-2 rounded-md overflow-hidden group">
+ <CardHeader className="pb-4">
+ <div className="flex items-center gap-4">
+ <div className={cn("w-14 h-14 rounded-md flex items-center justify-center text-xl transition-transform group-hover:rotate-12", color)}>
+ {icon}
+ </div>
+ <div>
+ <CardTitle className="text-xl font-bold text-slate-900">{name}</CardTitle>
+ <CardDescription className="text-emerald-700 font-semibold text-xs mt-1 uppercase tracking-wide">
+ {title}
+ </CardDescription>
+ </div>
+ </div>
+ </CardHeader>
+ <CardContent>
+ <p className="text-slate-500 text-sm leading-relaxed">
+ {desc}
+ </p>
+ </CardContent>
+ </Card>
+ </motion.div>
+ );
 }
 
-function TimelineItem({ era, year, text }) {
-  return (
-    <div className="flex gap-4 relative">
-      <div className="w-10 md:w-12 h-10 md:h-12 rounded-full bg-emerald-100 border-2 border-emerald-400 text-emerald-700 flex items-center justify-center text-xs font-bold shrink-0 z-10">
-        <i className="fas fa-circle text-[6px]"></i>
-      </div>
-      <div className="pt-1 pb-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-bold text-gray-900">{era}</span>
-          <span className="text-[11px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">{year}</span>
-        </div>
-        <p className="text-sm text-gray-600 mt-1">{text}</p>
-      </div>
-    </div>
-  );
-}
-
-function MissionCard({ icon, title, desc, percent }) {
-  return (
-    <div className="bg-green-50 rounded-lg p-5 border border-emerald-200 hover:shadow-md transition">
-      <div className="w-12 h-12 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
-        <i className={`fas ${icon}`}></i>
-      </div>
-      <h3 className="mt-3 font-bold text-gray-900">{title}</h3>
-      <p className="mt-2 text-sm text-gray-600 leading-relaxed">{desc}</p>
-      <div className="mt-4 flex items-center gap-2">
-        <div className="flex-1 h-2 bg-emerald-100 rounded-full overflow-hidden">
-          <div className="h-full bg-emerald-600 rounded-full" style={{ width: percent }} />
-        </div>
-        <span className="text-xs font-bold text-emerald-700">{percent}</span>
-      </div>
-    </div>
-  );
-}
-
-function ImpactStat({ icon, value, label }) {
-  return (
-    <div className="bg-white rounded-lg p-5 text-center border border-emerald-200 hover:shadow-md transition">
-      <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
-        <i className={`fas ${icon}`}></i>
-      </div>
-      <p className="mt-3 text-2xl md:text-3xl font-bold text-gray-900">{value}</p>
-      <p className="mt-1 text-sm text-gray-600">{label}</p>
-    </div>
-  );
+function MissionItem({ icon, title, desc, percent, color }) {
+ return (
+ <Card className="border-none bg-white p-4 rounded-md group hover: transition-all">
+ <div className={cn("mb-4 h-16 w-16 rounded-md flex items-center justify-center text-white", color)}>
+ {icon}
+ </div>
+ <h3 className="text-2xl font-extrabold text-slate-900 mb-4">{title}</h3>
+ <p className="text-slate-500 mb-5 leading-relaxed">
+ {desc}
+ </p>
+ <div className="space-y-3">
+ <div className="flex justify-between items-end">
+ <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Priority Impact</span>
+ <span className="text-lg font-black text-slate-800">{percent}</span>
+ </div>
+ <div className="h-3 w-full bg-slate-100 rounded-md overflow-hidden">
+ <motion.div
+ initial={{ width: 0 }}
+ whileInView={{ width: percent }}
+ transition={{ duration: 1.5, ease:"easeOut"}}
+ className={cn("h-full rounded-md", color)}
+ />
+ </div>
+ </div>
+ </Card>
+ );
 }

@@ -1,356 +1,336 @@
-import AdminLayout from "@/layouts/AdminLayout";
-import { useState } from "react";
-import { Link, usePage, router } from "@inertiajs/react";
+import AdminLayout from"@/layouts/AdminLayout";
+import { useState } from"react";
+import { Link, usePage, router } from"@inertiajs/react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from"@/components/ui/card";
+import { Button } from"@/components/ui/button";
+import { Badge } from"@/components/ui/badge";
+import { 
+ HandHeart, Wallet, PiggyBank, Users, 
+ ArrowUpRight, ArrowDownRight, Activity as ActivityIcon, 
+ PlusCircle, FileText, Search, X, ChevronRight, TrendingUp, ClipboardList, Settings
+} from"lucide-react";
+import { cn } from"@/lib/utils";
+import { motion } from"framer-motion";
 
+const fadeInUp = {
+ initial: { opacity: 0, y: 15 },
+ animate: { opacity: 1, y: 0 },
+ transition: { duration: 0.4 }
+};
 
 export default function Dashboard() {
-    const {
-        totalCommitment,
-        fund_raised,
-        totalSpent,
-        totalBalance,
-        totalDoner,
-        recentPayments = [],
-        recentExpenses = [],
-        allUsers = {},
-        filters = {}
-    } = usePage().props;
+ const {
+ totalCommitment,
+ fund_raised,
+ totalBalance,
+ totalDoner,
+ recentPayments = [],
+ recentExpenses = [],
+ allUsers = {},
+ filters = {}
+ } = usePage().props;
 
-    const [openPaymentModal, setOpenPaymentModal] = useState(false);
-    const [search, setSearch] = useState(filters.search || "");
+ const [openPaymentModal, setOpenPaymentModal] = useState(false);
+ const [search, setSearch] = useState(filters.search ||"");
 
-    return (
-        <AdminLayout>
+ return (
+ <AdminLayout>
+ {/* Page Header */}
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+ <motion.div {...fadeInUp}>
+ <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+ Dashboard Overview
+ </h1>
+ </motion.div>
+ <div className="flex gap-2">
+ <Button asChild variant="outline"size="sm"className="rounded-md border-slate-200 transition-all hover:bg-slate-100">
+ <Link href="/admin/reports">
+ <FileText className="h-4 w-4 mr-2"/>
+ View Analytics
+ </Link>
+ </Button>
+ <Button size="sm"className="rounded-md bg-red-600 hover:bg-red-700 transition-all active:scale-95 px-5"onClick={() => setOpenPaymentModal(true)}>
+ <PlusCircle className="h-4 w-4 mr-2"/>
+ Quick Payment
+ </Button>
+ </div>
+ </div>
 
-            {/* ================= HEADER ================= */}
-            <div className="mb-8">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                    Dashboard Overview
-                </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                    Complete snapshot of NGO commitments & activities
-                </p>
-            </div>
+ {/* Core Stats */}
+ <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+ <StatCard 
+ title="Total Commitment"
+ value={`₹${totalCommitment?.toLocaleString()}`} 
+ icon={<HandHeart className="h-5 w-5"/>} 
+ description="Total pledged amount"
+ color="bg-red-50 text-red-700"
+ trend="+12% from last month"
+ />
+ <StatCard 
+ title="Amount Received"
+ value={`₹${fund_raised?.toLocaleString()}`} 
+ icon={<Wallet className="h-5 w-5"/>} 
+ description="Successfully collected"
+ color="bg-emerald-50 text-emerald-700"
+ trend="+8% collections up"
+ />
+ <StatCard 
+ title="Remaining Balance"
+ value={`₹${totalBalance?.toLocaleString()}`} 
+ icon={<PiggyBank className="h-5 w-5"/>} 
+ description="Pending collection"
+ color="bg-blue-50 text-blue-700"
+ trend="Needs attention"
+ />
+ <StatCard 
+ title="Active Supporters"
+ value={totalDoner} 
+ icon={<Users className="h-5 w-5"/>} 
+ description="Total registered donors"
+ color="bg-purple-50 text-purple-700"
+ trend="Active this week"
+ />
+ </div>
 
-            {/* ================= STATS ================= */}
-            <div className="
-                grid grid-cols-2
-                lg:grid-cols-4
-                gap-4 sm:gap-6
-            ">
-                <StatCard
-                    title="Total Commitment"
-                    value={`₹ ${totalCommitment}`}
-                    icon="fa-hand-holding-heart"
-                />
-                <StatCard
-                    title="Amount Received"
-                    value={`₹ ${fund_raised}`}
+ {/* Middle Grid */}
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-3 items-start">
+ {/* Recent Payments */}
+ <Card className="lg:col-span-1 border-slate-100 rounded-md overflow-hidden hover: transition-all h-full">
+ <CardHeader className="flex flex-row items-center justify-between px-4 py-4 border-b border-slate-50">
+ <div>
+ <CardTitle className="text-lg font-bold">Recent Payments</CardTitle>
+ <CardDescription className="text-xs">Latest 5 contributions</CardDescription>
+ </div>
+ <Link href="/admin/transactions"className="text-xs text-red-600 hover:underline font-bold uppercase tracking-widest">
+ See All
+ </Link>
+ </CardHeader>
+ <CardContent className="px-3 py-3 space-y-2">
+ {recentPayments.map((p, i) => (
+ <ActivityItem 
+ key={i} 
+ title={p.user.name} 
+ amount={p.amount} 
+ date={p.payment_date} 
+ type="payment"
+ />
+ ))}
+ {recentPayments.length === 0 && <EmptyState text="No recent payments"/>}
+ </CardContent>
+ </Card>
 
-                    icon="fa-wallet"
-                />
-                <StatCard
-                    title="Remaining Balance"
-                    value={`₹ ${totalBalance}`}
-                    icon="fa-piggy-bank"
-                />
-                <StatCard
-                    title="Active Supporters"
-                    value={totalDoner}
-                    icon="fa-users"
-                />
-            </div>
+ {/* Recent Expenses */}
+ <Card className="lg:col-span-1 border-slate-100 rounded-md overflow-hidden hover: transition-all h-full">
+ <CardHeader className="flex flex-row items-center justify-between px-4 py-4 border-b border-slate-50">
+ <div>
+ <CardTitle className="text-lg font-bold">Recent Expenses</CardTitle>
+ <CardDescription className="text-xs">Operational outgoing funds</CardDescription>
+ </div>
+ <Link href="/admin/expense"className="text-xs text-blue-600 hover:underline font-bold uppercase tracking-widest">
+ Details
+ </Link>
+ </CardHeader>
+ <CardContent className="px-3 py-3 space-y-2">
+ {recentExpenses.map((e, i) => (
+ <ActivityItem 
+ key={i} 
+ title={e.description} 
+ amount={e.amount} 
+ date={e.date} 
+ type="expense"
+ />
+ ))}
+ {recentExpenses.length === 0 && <EmptyState text="No recent expenses"/>}
+ </CardContent>
+ </Card>
 
-            {/* ================= LOWER GRID ================= */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10 items-start">
+ {/* Quick Actions & Insights */}
+ <div className="lg:col-span-1 space-y-8">
+ <Card className="border-none bg-slate-900 text-white rounded-md p-4 transform rotate-1 overflow-hidden group">
+ <div className="absolute top-0 right-0 w-32 h-32 bg-red-600 rounded-md blur-3xl opacity-20 -z-0"></div>
+ <div className="relative z-10">
+ <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+ <TrendingUp className="h-5 w-5 text-red-400"/>
+ Action Center
+ </h3>
+ <div className="space-y-3">
+ <ActionLink href="/admin/add-member-page"label="Onboard Member"icon={<Users className="h-4 w-4"/>} color="bg-red-500/20 text-red-300"/>
+ <ActionLink href="/admin/plans"label="Manage Plans"icon={<ClipboardList className="h-4 w-4"/>} color="bg-blue-500/20 text-blue-300"/>
+ <ActionLink href="/admin/settings"label="System Settings"icon={<Settings className="h-4 w-4"/>} color="bg-purple-500/20 text-purple-300"/>
+ </div>
+ </div>
+ </Card>
 
+ <Card className="border-slate-100 rounded-md p-4 bg-white">
+ <h4 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-4 px-1">Growth Index</h4>
+ <div className="space-y-5">
+ <GrowthIndicator label="Fund Recovery"percent={75} color="bg-emerald-500"/>
+ <GrowthIndicator label="Target Completion"percent={45} color="bg-red-500"/>
+ </div>
+ </Card>
+ </div>
+ </div>
 
-                {/* ================= ACTIVITY ================= */}
-                <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-5">
-                    <h2 className="text-sm font-semibold text-gray-900 mb-4">
-                        Recent Payments
-                    </h2>
+ {/* Payment Modal */}
+ {openPaymentModal && (
+ <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+ <motion.div 
+ initial={{ opacity: 0 }} 
+ animate={{ opacity: 1 }} 
+ className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+ onClick={() => setOpenPaymentModal(false)}
+ />
+ <motion.div 
+ initial={{ opacity: 0, scale: 0.95, y: 10 }}
+ animate={{ opacity: 1, scale: 1, y: 0 }}
+ className="relative bg-white w-full max-w-xl rounded-md p-4 overflow-hidden flex flex-col max-h-[90vh]"
+ >
+ <div className="flex justify-between items-center mb-5">
+ <div>
+ <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Add Payment</h2>
+ <p className="text-xs text-slate-500">Pick a member to record an amount</p>
+ </div>
+ <Button variant="ghost"size="icon"className="rounded-md h-10 w-10 hover:bg-slate-100"onClick={() => setOpenPaymentModal(false)}>
+ <X className="h-5 w-5"/>
+ </Button>
+ </div>
 
-                    <div className="space-y-3">
-                        {recentPayments.map((payment, index) => (
-                            <div
-                                key={`payment-${index}`}
-                                className="bg-gray-50 rounded-md p-3"
-                            >
-                                <div className="flex justify-between items-center mb-1">
-                                    <p className="text-sm font-semibold text-red-800">
-                                        ₹ {payment.amount}
-                                    </p>
-                                    <span className="text-xs text-gray-400">
-                                        {payment.payment_date}
-                                    </span>
-                                </div>
+ <div className="relative mb-4">
+ <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"/>
+ <input 
+ type="text"
+ placeholder="Search by name or phone..."
+ value={search}
+ onChange={(e) => {
+ const val = e.target.value;
+ setSearch(val);
+ router.get("/admin/dashboard", { search: val }, { preserveState: true, replace: true });
+ }}
+ className="w-full h-14 pl-12 pr-6 bg-slate-50 border-none rounded-md focus:ring-2 focus:ring-red-100 transition-all text-sm"
+ />
+ </div>
 
-                                <p className="text-sm text-gray-700 truncate">
-                                    Received from {payment.user.name}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                <div className="lg:col-span-1 bg-white rounded-lg shadow-sm p-5">
-                    <h2 className="text-sm font-semibold text-gray-900 mb-4">
-                        Recent Expenses
-                    </h2>
+ <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+ {allUsers?.data?.map(user => (
+ <Link 
+ key={user.id} 
+ href={`/admin/userdetail/${user.id}`}
+ className="group flex items-center justify-between p-4 rounded-md border border-slate-50 hover:bg-slate-50 transition-all"
+ >
+ <div className="flex items-center gap-4">
+ <div className="h-10 w-10 rounded-md bg-slate-100 flex items-center justify-center text-slate-600 font-bold group-hover:bg-red-500 group-hover:text-white transition-colors">
+ {user.name.charAt(0)}
+ </div>
+ <div>
+ <p className="text-sm font-bold text-slate-800 tracking-tight leading-none mb-1">{user.name}</p>
+ <p className="text-[10px] text-slate-500 font-medium">{user.phone || user.email}</p>
+ </div>
+ </div>
+ <div className="h-8 w-8 rounded-md bg-white flex items-center justify-center text-slate-400 group-hover:bg-red-500 group-hover:text-white transition-all transform translate-x-1 group-hover:translate-x-0">
+ <ChevronRight className="h-4 w-4"/>
+ </div>
+ </Link>
+ ))}
+ {allUsers?.data?.length === 0 && (
+ <div className="text-center py-4 opacity-40 italic text-sm">No members matching search</div>
+ )}
+ </div>
 
-                    <div className="space-y-3">
-                        {recentExpenses.map((expense, index) => (
-                            <div
-                                key={`expense-${index}`}
-                                className="bg-gray-50 rounded-md p-3"
-                            >
-                                <div className="flex justify-between items-center mb-1">
-                                    <p className="text-sm font-semibold text-red-800">
-                                        ₹ {expense.amount}
-                                    </p>
-                                    <span className="text-xs text-gray-400">
-                                        {expense.date}
-                                    </span>
-                                </div>
-
-                                {/* DESCRIPTION WITH TRUNCATE */}
-                                <p className="text-sm text-gray-700 line-clamp-2">
-                                    {expense.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-
-                <div className="bg-white rounded-lg shadow-sm p-5">
-                    <h2 className="text-sm font-semibold text-gray-900 mb-4">
-                        Quick Actions
-                    </h2>
-
-                    <div className="space-y-2">
-                        <Action label="Add New Member" icon="fa-user" href="/admin/add-member-page" />
-                        <Action label="Add Commitment" icon="fa-calendar-plus" href="/admin/commitments/create" />
-                        <Action label="View Reports" icon="fa-file-alt" href="/admin/reports" />
-                    </div>
-                </div>
-
-
-            </div>
-
-            {/* ================= PAYMENT MODAL ================= */}
-            {/* ================= PAYMENT MODAL ================= */}
-            {openPaymentModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-3">
-
-                    {/* Overlay */}
-                    <div
-                        className="absolute inset-0 bg-black/40"
-                        onClick={() => setOpenPaymentModal(false)}
-                    ></div>
-
-                    {/* Modal */}
-                    <div className="
-            relative bg-white w-full max-w-2xl
-            rounded-lg shadow-xl
-            p-6 z-10
-            max-h-[80vh] flex flex-col
-        ">
-
-                        {/* Header */}
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-lg font-semibold text-gray-900">
-                                Select Member for Payment
-                            </h2>
-
-                            <button
-                                onClick={() => setOpenPaymentModal(false)}
-                                className="text-gray-400 hover:text-red-700"
-                            >
-                                <i className="fas fa-times"></i>
-                            </button>
-                        </div>
-
-                        {/* 🔍 SERVER SIDE SEARCH */}
-                        <input
-                            type="text"
-                            placeholder="Search by name or phone..."
-                            value={search}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                setSearch(value);
-
-                                router.get(
-                                    "/admin/dashboard",
-                                    { search: value },
-                                    {
-                                        preserveState: true,
-                                        replace: true
-                                    }
-                                );
-                            }}
-                            className="
-                    w-full h-10 px-4 rounded-md
-                    border border-gray-300
-                    text-sm
-                    focus:outline-none
-                    focus:ring-2 focus:ring-red-200
-                    focus:border-red-300
-                    mb-4
-                "
-                        />
-
-                        {/* User List */}
-                        <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-
-                            {allUsers?.data?.length === 0 ? (
-                                <p className="text-sm text-gray-500 text-center py-6">
-                                    No members found
-                                </p>
-                            ) : (
-                                allUsers.data.map(user => (
-                                    <Link
-                                        key={user.id}
-                                        href={`/admin/userdetail/${user.id}`}
-                                        className="
-                                block p-3 rounded-md
-                                bg-gray-50
-                                hover:bg-red-50
-                                transition
-                            "
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-800">
-                                                    {user.name}
-                                                </p>
-                                                <p className="text-xs text-gray-500">
-                                                    {user.phone || user.email}
-                                                </p>
-                                            </div>
-
-                                            <i className="fas fa-arrow-right text-red-700 text-sm"></i>
-                                        </div>
-                                    </Link>
-                                ))
-                            )}
-                        </div>
-
-                        {/* Pagination */}
-                        {allUsers?.links?.length > 1 && (
-                            <div className="mt-4 flex justify-end gap-1 flex-wrap">
-                                {allUsers.links.map((link, index) => (
-                                    <Link
-                                        key={index}
-                                        href={link.url || "#"}
-                                        className={`
-                                px-3 py-1 rounded-md text-xs
-                                ${link.active
-                                                ? "bg-red-800 text-white"
-                                                : "bg-white text-gray-600 hover:bg-red-50"}
-                                ${!link.url && "opacity-40 pointer-events-none"}
-                            `}
-                                        dangerouslySetInnerHTML={{ __html: link.label }}
-                                    />
-                                ))}
-                            </div>
-                        )}
-
-                    </div>
-                </div>
-            )}
-
-            {/* ================= FLOATING ADD PAYMENT ================= */}
-            {/* ================= FLOATING ADD PAYMENT ================= */}
-            <button
-                onClick={() => setOpenPaymentModal(true)}
-                className="
-        fixed bottom-6 right-6 z-40
-        flex items-center gap-2
-        px-5 h-12
-        rounded-full
-        bg-red-800 text-white
-        shadow-lg
-        hover:bg-red-900 hover:shadow-xl
-        active:scale-95
-        transition-all duration-200
-    "
-            >
-                <i className="fas fa-money-bill-wave text-sm"></i>
-
-                <span className="text-sm font-medium">
-                    Add Payment
-                </span>
-            </button>
-
-
-
-        </AdminLayout>
-    );
+ {allUsers?.links?.length > 3 && (
+ <div className="mt-5 pt-6 border-t border-slate-50 flex justify-center gap-1">
+ {allUsers.links.filter(l => l.url).map((l, i) => (
+ <Link 
+ key={i} 
+ href={l.url} 
+ className={cn(
+"w-8 h-8 flex items-center justify-center rounded-md text-xs font-bold transition-all",
+ l.active ?"bg-red-600 text-white":"bg-slate-100 text-slate-500 hover:bg-slate-200"
+ )}
+ dangerouslySetInnerHTML={{ __html: l.label }}
+ />
+ ))}
+ </div>
+ )}
+ </motion.div>
+ </div>
+ )}
+ </AdminLayout>
+ );
 }
 
-/* ================= COMPONENTS ================= */
-
-function StatCard({ title, value, icon }) {
-    return (
-        <div className="
-            bg-white rounded-lg shadow-sm
-            px-5 py-4
-            hover:shadow transition
-        ">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-xs text-gray-500">
-                        {title}
-                    </p>
-                    <p className="text-xl font-semibold text-gray-900 mt-1">
-                        {value}
-                    </p>
-                </div>
-
-                <div className="
-                    w-10 h-10 rounded-md
-                    bg-red-50 text-red-700
-                    flex items-center justify-center
-                ">
-                    <i className={`fas ${icon} text-sm`}></i>
-                </div>
-            </div>
-        </div>
-    );
+function StatCard({ title, value, icon, description, color, trend }) {
+ return (
+ <motion.div {...fadeInUp} whileHover={{ y: -5 }} transition={{ duration: 0.2 }}>
+ <Card className="h-full border-slate-100 rounded-md overflow-hidden hover: transition-all group p-3">
+ <div className="flex justify-between items-start mb-2">
+ <div className={cn("p-2 rounded-md transform transition-transform group-hover:rotate-6", color)}>
+ {icon}
+ </div>
+ </div>
+ <div>
+ <h3 className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400 mb-1 leading-tight">{title}</h3>
+ <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none mb-1">{value}</div>
+ <p className="text-[9px] text-slate-400 font-medium mb-2 leading-tight hidden sm:block">{description}</p>
+ <div className="flex items-center gap-1.5 pt-2 border-t border-slate-50">
+ <ArrowUpRight className="h-3 w-3 text-emerald-500"/>
+ <span className="text-[10px] font-bold text-slate-500">{trend}</span>
+ </div>
+ </div>
+ </Card>
+ </motion.div>
+ );
 }
 
-function Activity({ text, time }) {
-    return (
-        <div className="flex items-start justify-between gap-4">
-            <p className="text-sm text-gray-700 leading-relaxed">
-                {text}
-            </p>
-            <span className="text-xs text-gray-400 whitespace-nowrap">
-                {time}
-            </span>
-        </div>
-    );
+function ActivityItem({ title, amount, date, type }) {
+ return (
+ <div className="flex items-center justify-between p-2 rounded-md bg-slate-50/50 border border-slate-50 group hover:bg-white transition-all">
+ <div className="flex items-center gap-3 min-w-0">
+ <div className={cn("h-8 w-8 flex items-center justify-center rounded-md", type ==="payment"?"bg-emerald-50 text-emerald-600":"bg-red-50 text-red-600")}>
+ {type ==="payment"? <ArrowUpRight className="h-5 w-5"/> : <ArrowDownRight className="h-5 w-5"/>}
+ </div>
+ <div className="min-w-0">
+ <p className="text-xs font-bold text-slate-900 truncate tracking-tight">{title}</p>
+ <p className="text-[10px] text-slate-400 font-medium">{date}</p>
+ </div>
+ </div>
+ <div className={cn("text-base font-black tracking-tighter whitespace-nowrap", type ==="payment"?"text-emerald-700":"text-red-700")}>
+ {type ==="payment"?"+":"-"} ₹{amount}
+ </div>
+ </div>
+ );
 }
 
-function Action({ label, icon, href }) {
-    return (
-        <Link
-            href={href}
-            className="
-                flex items-center gap-3 px-3 py-2 rounded-md
-                text-sm text-gray-700
-                hover:bg-red-50 transition
-            "
-        >
-            <div className="
-                w-8 h-8 rounded-md
-                bg-red-50 text-red-700
-                flex items-center justify-center
-            ">
-                <i className={`fas ${icon} text-xs`}></i>
-            </div>
-            {label}
-        </Link>
-    );
+function ActionLink({ href, label, icon, color }) {
+ return (
+ <Link href={href} className="group flex items-center gap-3 p-2 rounded-md hover:bg-white/10 transition-all">
+ <div className={cn("w-8 h-8 flex items-center justify-center rounded-md transform group-hover:scale-110 group-hover:-rotate-3 transition-transform", color)}>
+ {icon}
+ </div>
+ <span className="text-sm font-semibold tracking-wide flex-1">{label}</span>
+ <ChevronRight className="h-4 w-4 opacity-30 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all"/>
+ </Link>
+ );
+}
+
+function GrowthIndicator({ label, percent, color }) {
+ return (
+ <div className="space-y-2">
+ <div className="flex justify-between items-end">
+ <span className="text-xs font-bold text-slate-600">{label}</span>
+ <span className="text-xs font-black text-slate-400">{percent}%</span>
+ </div>
+ <div className="h-2 w-full bg-slate-100 rounded-md overflow-hidden">
+ <motion.div 
+ initial={{ width: 0 }} 
+ whileInView={{ width:`${percent}%` }} 
+ transition={{ duration: 1, ease:"easeOut"}}
+ className={cn("h-full rounded-md", color)} 
+ />
+ </div>
+ </div>
+ );
+}
+
+function EmptyState({ text }) {
+ return <div className="text-center py-4 opacity-40 text-xs italic">{text}</div>;
 }

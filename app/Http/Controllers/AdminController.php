@@ -145,8 +145,7 @@ class AdminController extends Controller
                         'end_date' => $up->end_date,
                         'status' => $up->status,
                         'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
-                        'payments' => $up->payments()->latest()->get()->
-                            map(function ($payment) {
+                        'payments' => $up->payments()->latest()->get()->map(function ($payment) {
                                 return [
                                     'amount' => $payment->amount,
                                     'payment_date' => $payment->payment_date,
@@ -170,8 +169,7 @@ class AdminController extends Controller
                         'end_date' => $up->end_date,
                         'status' => $up->status,
                         'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
-                        'payments' => $up->payments()->latest()->get()->
-                            map(function ($payment) {
+                        'payments' => $up->payments()->latest()->get()->map(function ($payment) {
                                 return [
                                     'amount' => $payment->amount,
                                     'payment_date' => $payment->payment_date,
