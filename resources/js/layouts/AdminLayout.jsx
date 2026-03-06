@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { 
   LayoutDashboard, Users, ClipboardList, Receipt, 
   Banknote, PieChart, UserPlus, Settings, LogOut, Menu,
-  Bell, Search, User, ChevronRight
+  Bell, Search, User, ChevronRight, ArrowLeft
 } from "lucide-react";
 import { useLanguage, LanguageSwitcher } from "@/contexts/LanguageContext";
 
@@ -117,10 +117,15 @@ export default function AdminLayout({ children }) {
   )}>
  {/* Header */}
  <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 sm:px-4 flex items-center justify-between">
- <div className="flex items-center gap-4">
+  <div className="flex items-center gap-4">
+  {url !== '/admin/dashboard' && (
+    <Button variant="ghost" size="icon" className="rounded-md hover:bg-slate-100" onClick={() => window.history.back()}>
+      <ArrowLeft className="h-5 w-5 text-slate-600" />
+    </Button>
+  )}
  <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
  <SheetTrigger asChild>
- <Button variant="ghost"size="icon"className="lg:hidden rounded-md hover:bg-slate-100">
+ <Button variant="ghost"size="icon"className="lg:hidden rounded-md hover:bg-slate-100 hidden">
  <Menu className="h-5 w-5 text-slate-600"/>
  </Button>
  </SheetTrigger>
@@ -179,7 +184,41 @@ export default function AdminLayout({ children }) {
 
  {children}
  </main>
- </div>
+
+  {/* Mobile Bottom Navigation */}
+  <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around items-center p-2 z-40 pb-safe">
+    {[
+      { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+      { label: "Plans", href: "/admin/plans", icon: ClipboardList },
+      { label: "Member", href: "/admin/add-member-page", icon: UserPlus },
+      { label: "Reports", href: "/admin/reports", icon: PieChart },
+      { label: "More", href: "#", icon: Menu, isMenu: true }
+    ].map((item) => (
+      item.isMenu ? (
+        <Sheet key="more" open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+          <SheetTrigger asChild>
+            <button className="flex flex-col items-center justify-center p-2 text-slate-500 hover:text-red-500">
+              <item.icon className="h-5 w-5 mb-1" />
+              <span className="text-[10px] font-medium">{item.label}</span>
+            </button>
+          </SheetTrigger>
+        </Sheet>
+      ) : (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={cn(
+            "flex flex-col items-center justify-center p-2 transition-colors",
+            active(item.href) ? "text-red-600" : "text-slate-500 hover:text-red-500"
+          )}
+        >
+          <item.icon className="h-5 w-5 mb-1" />
+          <span className="text-[10px] font-medium">{t['nav' + item.label.replace(' ', '')] || item.label}</span>
+        </Link>
+      )
+    ))}
+  </div>
+  </div>
  </div>
  );
 }
