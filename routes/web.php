@@ -12,6 +12,8 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/programs', 'programs')->name('programs');
     Route::get('/vision', 'vision')->name('vision');
     Route::get('/join', 'join')->name('join');
+    Route::get('/privacy-policy', 'privacyPolicy')->name('privacy-policy');
+    Route::get('/account-deletion', 'accountDeletion')->name('account-deletion');
     Route::get('/login', 'login')->name('login');
     Route::get('/signup', 'signup')->name('signup');
     Route::get('/forgot-password', 'forgotPassword')->name('forgotpassword');
@@ -37,6 +39,7 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/programs', 'programs')->name('programs');
     Route::get('/users', 'users')->name('users');
     Route::get('/settings', 'settings')->name('settings');
+    Route::post('/settings', 'updateSettings')->name('settings.update');
     Route::get('/reports', 'reports')->name('reports');
 
     // Plan CRUD

@@ -41,6 +41,14 @@ class UserController extends Controller
     {
         return Inertia::render('public/join');
     }
+    public function privacyPolicy()
+    {
+        return Inertia::render('public/privacy-policy');
+    }
+    public function accountDeletion()
+    {
+        return Inertia::render('public/account-deletion');
+    }
     public function login()
     {
         return Inertia::render('auth/login');

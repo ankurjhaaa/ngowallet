@@ -11,7 +11,7 @@ export default function PublicLayout({ children }) {
 }
 
 function LayoutInner({ children }) {
-    const { auth } = usePage().props;
+    const { auth, settings = {} } = usePage().props;
     const user = auth?.user;
     const [open, setOpen] = useState(false);
     const { t, lang } = useLanguage();
@@ -112,9 +112,9 @@ function LayoutInner({ children }) {
             {/* ================= MAIN ================= */}
             <main className="flex-1 pt-16">{children}</main>
 
-            {/* ================= FOOTER (Desktop) ================= */}
-            <footer className="hidden md:block bg-emerald-950 mt-16">
-                <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-4 gap-10 text-sm">
+            {/* ================= FOOTER ================= */}
+            <footer className="bg-emerald-950 mt-16">
+                <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 text-sm">
                     <div>
                         <h3 className="font-semibold text-white mb-4">{t.footerAbout}</h3>
                         <p className="text-emerald-200/70 leading-relaxed">{t.footerAboutDesc}</p>
@@ -126,16 +126,24 @@ function LayoutInner({ children }) {
                             <li><Link href="/vision" className="hover:text-white">{t.navVision}</Link></li>
                             <li><Link href="/programs" className="hover:text-white">{t.navPrograms}</Link></li>
                             <li><Link href="/join" className="hover:text-white">{t.navJoin}</Link></li>
+                            <li><Link href="/privacy-policy" className="hover:text-white">{t.footerPrivacyPolicy}</Link></li>
+                            <li><Link href="/account-deletion" className="hover:text-white">{t.footerAccountDeletion}</Link></li>
                             <li><Link href="/admin/dashboard" className="text-emerald-400 hover:text-white">Admin</Link></li>
                         </ul>
                     </div>
                     <div>
                         <h3 className="font-semibold text-white mb-4">{t.footerContact}</h3>
                         <p className="flex items-center gap-2 text-emerald-200/70">
-                            <i className="fas fa-envelope text-emerald-400"></i> info@bazm-e-haidri.org
+                            <i className="fas fa-envelope text-emerald-400"></i>
+                            {settings.ngo_email || 'info@bazm-e-haidri.org'}
                         </p>
                         <p className="flex items-center gap-2 mt-2 text-emerald-200/70">
-                            <i className="fas fa-phone text-emerald-400"></i> +91 90000 00000
+                            <i className="fas fa-phone text-emerald-400"></i>
+                            {settings.ngo_phone || '+91 90000 00000'}
+                        </p>
+                        <p className="flex items-start gap-2 mt-3 text-emerald-200/70">
+                            <i className="fas fa-map-marker-alt text-emerald-400 mt-1"></i>
+                            {settings.ngo_address || 'NGO Address, City, State, India'}
                         </p>
                     </div>
                     <div>
@@ -148,7 +156,7 @@ function LayoutInner({ children }) {
                     </div>
                 </div>
                 <div className="text-center text-xs text-emerald-200/40 pb-6">
-                    © {new Date().getFullYear()} {t.footerCopy}
+                    © {new Date().getFullYear()} {settings.ngo_name || t.footerCopy}
                 </div>
             </footer>
 

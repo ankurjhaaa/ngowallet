@@ -4,6 +4,7 @@ import { useState } from "react";
 export default function AdminLayout({ children }) {
     const { url, props } = usePage();
     const user = props.auth?.user;
+    const settings = props.settings || {};
     const [open, setOpen] = useState(false);
 
     const active = (path) => url.startsWith(path);
@@ -85,6 +86,17 @@ export default function AdminLayout({ children }) {
 
                 {/* ================= CONTENT ================= */}
                 <main className="flex-1 p-3 sm:p-6 my-20 min-w-0">
+                    {/* flash messages */}
+                    {props.flash?.success && (
+                        <div className="mb-4 rounded-md bg-green-50 p-4 text-green-800 text-sm">
+                            {props.flash.success}
+                        </div>
+                    )}
+                    {props.flash?.error && (
+                        <div className="mb-4 rounded-md bg-red-50 p-4 text-red-800 text-sm">
+                            {props.flash.error}
+                        </div>
+                    )}
                     {children}
                 </main>
             </div>

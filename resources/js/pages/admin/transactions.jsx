@@ -103,95 +103,106 @@ export default function Transactions() {
                 onFinish: () => setSendingId(null),
             }
         );
-    }; 
+    };
 
     return (
         <AdminLayout>
-            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">All Transactions</h1>
-                    <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                        Total records: {payments.total}
-                    </p>
-                </div>
-            </div>
-
-            <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4 sm:p-5 mb-6 space-y-3">
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-3">
-                    <input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search by amount / member"
-                        className="xl:col-span-2 w-full h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
-                    />
-
-                    <button
-                        onClick={() => setOpenMemberModal(true)}
-                        className="h-10 rounded-md border border-gray-200 px-3 text-sm text-left text-gray-700 bg-white hover:bg-gray-50 transition"
-                    >
-                        {memberLabel || "Select Member"}
-                    </button>
-
-                    <select
-                        value={paymentMode}
-                        onChange={(e) => setPaymentMode(e.target.value)}
-                        className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
-                    >
-                        {paymentModes.map((mode) => (
-                            <option key={mode} value={mode}>
-                                {mode === "all" ? "All Modes" : mode.toUpperCase()}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        value={planId}
-                        onChange={(e) => setPlanId(e.target.value)}
-                        className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
-                    >
-                        <option value="all">All Plans</option>
-                        {plans.map((plan) => (
-                            <option key={plan.id} value={plan.id}>{plan.name}</option>
-                        ))}
-                    </select>
-
-                    <div className="grid grid-cols-2 gap-2">
-                        <input
-                            type="date"
-                            value={from}
-                            onChange={(e) => setFrom(e.target.value)}
-                            className="h-10 rounded-md border border-gray-200 px-3 text-xs sm:text-sm"
-                        />
-                        <input
-                            type="date"
-                            value={to}
-                            onChange={(e) => setTo(e.target.value)}
-                            className="h-10 rounded-md border border-gray-200 px-3 text-xs sm:text-sm"
-                        />
+            {/* header + filters container */}
+            <div className="mb-6">
+                <div className="bg-white rounded-lg border border-gray-100 shadow-sm">
+                    {/* HEADER */}
+                    <div className="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div>
+                            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+                                All Transactions
+                            </h1>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                                {payments.total} record{payments.total !== 1 ? 's' : ''}
+                            </p>
+                        </div>
+                        <div className="flex gap-2">
+                            {/* future action buttons can live here */}
+                        </div>
                     </div>
-                </div>
+                    {/* FILTERS */}
+                    <div className="border-t border-gray-100 p-4 sm:p-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-3">
+                            <input
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                placeholder="Search by amount / member"
+                                className=" w-full h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                            />
 
-                <div className="flex flex-wrap gap-2">
-                    <button
-                        onClick={applyFilters}
-                        className="h-9 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition"
-                    >
-                        Apply Filters
-                    </button>
-                    <button
-                        onClick={clearFilters}
-                        className="h-9 px-4 rounded-md bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition"
-                    >
-                        Reset
-                    </button>
-                    {memberId && (
-                        <button
-                            onClick={clearMemberFilter}
-                            className="h-9 px-4 rounded-md bg-amber-50 text-amber-700 text-sm font-medium hover:bg-amber-100 transition"
-                        >
-                            Clear Member
-                        </button>
-                    )}
+                            <button
+                                onClick={() => setOpenMemberModal(true)}
+                                className="h-10 rounded-md border border-gray-200 px-3 text-sm text-left text-gray-700 bg-white hover:bg-gray-50 transition"
+                            >
+                                {memberLabel || "Select Member"}
+                            </button>
+
+                            <select
+                                value={paymentMode}
+                                onChange={(e) => setPaymentMode(e.target.value)}
+                                className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                            >
+                                {paymentModes.map((mode) => (
+                                    <option key={mode} value={mode}>
+                                        {mode === "all" ? "All Modes" : mode.toUpperCase()}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <select
+                                value={planId}
+                                onChange={(e) => setPlanId(e.target.value)}
+                                className="h-10 rounded-md border border-gray-200 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                            >
+                                <option value="all">All Plans</option>
+                                {plans.map((plan) => (
+                                    <option key={plan.id} value={plan.id}>{plan.name}</option>
+                                ))}
+                            </select>
+
+
+                            <input
+                                type="date"
+                                value={from}
+                                onChange={(e) => setFrom(e.target.value)}
+                                className="h-10 rounded-md border border-gray-200 px-3 text-xs sm:text-sm"
+                            />
+                            <input
+                                type="date"
+                                value={to}
+                                onChange={(e) => setTo(e.target.value)}
+                                className="h-10 rounded-md border border-gray-200 px-3 text-xs sm:text-sm"
+                            />
+
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            <button
+                                onClick={applyFilters}
+                                className="h-9 px-4 rounded-md bg-red-800 text-white text-sm font-medium hover:bg-red-900 transition cursor-pointer"
+                            >
+                                Apply Filters
+                            </button>
+                            <button
+                                onClick={clearFilters}
+                                className="h-9 px-4 rounded-md bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition cursor-pointer"
+                            >
+                                Reset
+                            </button>
+                            {memberId && (
+                                <button
+                                    onClick={clearMemberFilter}
+                                    className="h-9 px-4 rounded-md bg-amber-50 text-amber-700 text-sm font-medium hover:bg-amber-100 transition cursor-pointer"
+                                >
+                                    Clear Member
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -242,7 +253,7 @@ export default function Transactions() {
                                                 </span>
                                             )}
                                         </td>
-                                       
+
                                         <td className="px-4 py-3 text-right">
                                             <button
                                                 onClick={() => sendMessage(payment.id)}

@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Setting;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -35,12 +36,21 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $settings = [];
+        try {
+            $settings = Setting::orderBy('key')->get()->mapWithKeys(fn($s) => [$s->key => $s->value])->toArray();
+        } catch (\Throwable $e) {
+            // settings table might not exist during early setup; fall back to empty array
+            $settings = [];
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
             ],
+            'settings' => $settings,
         ];
     }
 }

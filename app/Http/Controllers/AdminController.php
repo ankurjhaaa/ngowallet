@@ -8,6 +8,7 @@ use App\Models\Plan;
 use App\Models\Spend;
 use App\Models\User;
 use App\Models\UserPlan;
+use App\Models\Setting;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -447,7 +448,30 @@ class AdminController extends Controller
 
     public function settings()
     {
-        return Inertia::render('admin/settings');
+        $defaults = [
+            'ngo_name' => 'Bazm-e-Haidri',
+            'ngo_email' => 'info@bazm-e-haidri.org',
+            'ngo_phone' => '+91 90000 00000',
+            'ngo_address' => 'NGO Address, City, State, India',
+        ];
+
+        $settings = Setting::orderBy('key')->get()->mapWithKeys(fn($s) => [$s->key => $s->value]);
+        $settings = collect($defaults)->merge($settings)->toArray();
+
+        return Inertia::render('admin/settings', [
+            'settings' => $settings,
+        ]);
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $data = $request->validate([
+            '*' => 'nullable|string',
+        ]);
+        foreach ($data as $key => $value) {
+            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+        }
+        return redirect()->back()->with('success', 'Settings saved');
     }
 
     public function reports(Request $request)
