@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'msg91' => [
+        'base_url' => env('MSG91_BASE_URL', 'https://control.msg91.com'),
+        'auth_key' => env('MSG91_AUTH_KEY'),
+        'flow_id' => env('MSG91_PAYMENT_RECEIPT_FLOW_ID'),
+        'sender_id' => env('MSG91_SENDER_ID'),
+        'country_code' => env('MSG91_COUNTRY_CODE', '91'),
+    ],
+
 ];

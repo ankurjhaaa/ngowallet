@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\PaymentOtpHistory;
 use App\Models\Plan;
 use App\Models\Spend;
 use App\Models\User;
@@ -11,6 +12,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
@@ -151,7 +153,7 @@ class AdminController extends Controller
                             }),
                     ];
                 }),
-                'due_plans' => UserPlan::with('plan')
+            'due_plans' => UserPlan::with('plan')
                 ->where('user_id', $id)
                 ->where('status', 'due')
                 ->latest()
@@ -253,6 +255,138 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Payment added successfully');
     }
+
+    public function transactions(Request $request)
+    {
+        $q = trim((string) $request->input('q', ''));
+        $memberId = $request->input('member_id');
+        $paymentMode = $request->input('payment_mode', 'all');
+        $planId = $request->input('plan_id', 'all');
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $memberQuery = trim((string) $request->input('member_query', ''));
+
+        $payments = Payment::query()
+            ->with([
+                'user:id,name,phone',
+                'userPlan.plan:id,name',
+                'latestOtpHistory' => function ($query) {
+                    $query->select([
+                        'payment_otp_histories.id',
+                        'payment_otp_histories.payment_id',
+                        'payment_otp_histories.status',
+                        'payment_otp_histories.provider_response',
+                        'payment_otp_histories.sent_at',
+                        'payment_otp_histories.created_at',
+                    ]);
+                },
+            ])
+            ->withCount('otpHistories as otp_sent_count')
+            ->when($memberId, fn($query) => $query->where('user_id', $memberId))
+            ->when($paymentMode && $paymentMode !== 'all', fn($query) => $query->where('payment_mode', $paymentMode))
+            ->when($planId && $planId !== 'all', function ($query) use ($planId) {
+                $query->whereHas('userPlan', fn($planQuery) => $planQuery->where('plan_id', $planId));
+            })
+            ->when($from, fn($query) => $query->whereDate('payment_date', '>=', $from))
+            ->when($to, fn($query) => $query->whereDate('payment_date', '<=', $to))
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($inner) use ($q) {
+                    $inner->where('amount', 'like', "%{$q}%")
+                        ->orWhereHas('user', fn($userQuery) => $userQuery
+                            ->where('name', 'like', "%{$q}%")
+                            ->orWhere('phone', 'like', "%{$q}%"));
+                });
+            })
+            ->latest('payment_date')
+            ->latest('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        $members = User::query()
+            ->where('role', 'member')
+            ->when($memberQuery, function ($query) use ($memberQuery) {
+                $query->where(function ($inner) use ($memberQuery) {
+                    $inner->where('name', 'like', "%{$memberQuery}%")
+                        ->orWhere('phone', 'like', "%{$memberQuery}%");
+                });
+            })
+            ->orderBy('name')
+            ->paginate(8, ['*'], 'member_page')
+            ->withQueryString();
+
+        $selectedMember = null;
+        if ($memberId) {
+            $selectedMember = User::select('id', 'name', 'phone')->find($memberId);
+        }
+
+        return Inertia::render('admin/transactions', [
+            'payments' => $payments,
+            'members' => $members,
+            'plans' => Plan::select('id', 'name')->orderBy('name')->get(),
+            'filters' => [
+                'q' => $q,
+                'member_id' => $memberId,
+                'payment_mode' => $paymentMode,
+                'plan_id' => $planId,
+                'from' => $from,
+                'to' => $to,
+                'member_query' => $memberQuery,
+                'open_member_modal' => (bool) $request->boolean('open_member_modal'),
+            ],
+            'selectedMember' => $selectedMember,
+            'paymentModes' => ['all', 'cash', 'upi'],
+        ]);
+    }
+
+
+
+
+    public function sendMembershipMessage(Request $request, Payment $payment)
+    {
+        $baseUrl = 'https://control.msg91.com/api/v5/flow/';
+        $otp = rand(100000, 999999);
+        $mobile = '91' . $payment->user->phone;
+
+        $payload = [
+            "template_id" => "69a57bb32cc8fb28280426e2",
+            "sender" => "HAIDRI",
+            "short_url" => "0",
+            "recipients" => [
+                [
+                    "mobiles" => $mobile,
+                    "var1" => $payment->user->name,
+                    "var2" => $payment->amount,
+                ]
+            ]
+        ];
+
+        $response = Http::withHeaders([
+            'authkey' => '255108AsWkIhuXpb5c3026c8',
+            'accept' => 'application/json',
+            'content-type' => 'application/json'
+        ])->post($baseUrl, $payload);
+
+        $responseData = $response->json();
+        $status = $response->successful() ? 'sent' : 'failed';
+
+        PaymentOtpHistory::create([
+            'payment_id' => $payment->id,
+            'user_id' => $payment->user_id,
+            'sent_by' => auth()->id(),
+            'mobile' => $mobile,
+            'provider' => 'msg91',
+            'status' => $status,
+            'message' => 'OTP flow template: ' . ($payload['template_id'] ?? 'unknown'),
+            'provider_response' => $responseData,
+            'sent_at' => $status === 'sent' ? now() : null,
+        ]);
+
+        if ($status === 'sent') {
+            return redirect()->back()->with('success', 'Message sent successfully');
+        }
+
+        return redirect()->back()->with('error', 'Message failed to send');
+    }
     public function expense(Request $request)
     {
         $expenses = Spend::latest()->paginate(8);
@@ -329,21 +463,21 @@ class AdminController extends Controller
         $paymentMode = $request->input('payment_mode', 'all');
 
         $paymentsQuery = Payment::with(['user', 'userPlan.plan'])
-            ->when($from, fn ($q) => $q->whereDate('payment_date', '>=', $from))
-            ->when($to, fn ($q) => $q->whereDate('payment_date', '<=', $to))
+            ->when($from, fn($q) => $q->whereDate('payment_date', '>=', $from))
+            ->when($to, fn($q) => $q->whereDate('payment_date', '<=', $to))
             ->when($role && $role !== 'all', function ($q) use ($role) {
-                $q->whereHas('user', fn ($uq) => $uq->where('role', $role));
+                $q->whereHas('user', fn($uq) => $uq->where('role', $role));
             })
             ->when($planId && $planId !== 'all', function ($q) use ($planId) {
-                $q->whereHas('userPlan', fn ($pq) => $pq->where('plan_id', $planId));
+                $q->whereHas('userPlan', fn($pq) => $pq->where('plan_id', $planId));
             })
-            ->when($paymentMode && $paymentMode !== 'all', fn ($q) => $q->where('payment_mode', $paymentMode));
+            ->when($paymentMode && $paymentMode !== 'all', fn($q) => $q->where('payment_mode', $paymentMode));
 
         $payments = $paymentsQuery->get();
 
         $expenses = Spend::query()
-            ->when($from, fn ($q) => $q->whereDate('date', '>=', $from))
-            ->when($to, fn ($q) => $q->whereDate('date', '<=', $to))
+            ->when($from, fn($q) => $q->whereDate('date', '>=', $from))
+            ->when($to, fn($q) => $q->whereDate('date', '<=', $to))
             ->get();
 
         $period = CarbonPeriod::create($from->copy()->startOfMonth(), '1 month', $to->copy()->startOfMonth());
@@ -366,11 +500,11 @@ class AdminController extends Controller
         }
 
         $planBreakdown = $payments
-            ->groupBy(fn ($p) => $p->userPlan?->plan?->name ?? 'Unknown')
-            ->map(fn ($items) => $items->sum('amount'))
+            ->groupBy(fn($p) => $p->userPlan?->plan?->name ?? 'Unknown')
+            ->map(fn($items) => $items->sum('amount'))
             ->sortDesc();
 
-        $monthlyTotals = $paymentsByMonth->map(fn ($items) => $items->sum('amount'));
+        $monthlyTotals = $paymentsByMonth->map(fn($items) => $items->sum('amount'));
         $monthlyLabels = array_values($labels);
         $monthlyValues = array_values($collectionSeries);
 
