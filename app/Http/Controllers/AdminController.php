@@ -13,6 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
@@ -471,6 +472,110 @@ class AdminController extends Controller
             Setting::updateOrCreate(['key' => $key], ['value' => $value]);
         }
         return redirect()->back()->with('success', 'Settings saved');
+    }
+
+    public function downloadDatabaseBackup()
+    {
+        $connection = DB::connection();
+        $driver = $connection->getDriverName();
+        $dbName = $connection->getDatabaseName() ?: 'database';
+        $timestamp = now()->format('Y-m-d_H-i-s');
+
+        if (!in_array($driver, ['mysql', 'sqlite'])) {
+            return redirect()->back()->with('error', 'Database backup is currently supported for MySQL and SQLite only.');
+        }
+
+        $sql = [];
+        $sql[] = '-- Database Backup';
+        $sql[] = '-- Generated at: ' . now()->toDateTimeString();
+        $sql[] = '-- Driver: ' . $driver;
+        $sql[] = '';
+
+        $pdo = $connection->getPdo();
+
+        if ($driver === 'mysql') {
+            $tablesRaw = $connection->select('SHOW TABLES');
+            $tables = array_map(fn($row) => array_values((array) $row)[0], $tablesRaw);
+
+            foreach ($tables as $table) {
+                $createRow = (array) $connection->selectOne("SHOW CREATE TABLE `{$table}`");
+                $createTableSql = $createRow['Create Table'] ?? array_values($createRow)[1] ?? null;
+                if (!$createTableSql) {
+                    continue;
+                }
+
+                $sql[] = "DROP TABLE IF EXISTS `{$table}`;";
+                $sql[] = $createTableSql . ';';
+
+                $rows = $connection->table($table)->get();
+                if ($rows->isNotEmpty()) {
+                    $columns = array_keys((array) $rows->first());
+                    $columnList = implode(', ', array_map(fn($col) => "`{$col}`", $columns));
+
+                    foreach ($rows as $row) {
+                        $rowArray = (array) $row;
+                        $values = array_map(function ($value) use ($pdo) {
+                            if ($value === null) {
+                                return 'NULL';
+                            }
+
+                            return $pdo->quote((string) $value);
+                        }, $rowArray);
+
+                        $sql[] = "INSERT INTO `{$table}` ({$columnList}) VALUES (" . implode(', ', $values) . ");";
+                    }
+                }
+
+                $sql[] = '';
+            }
+        }
+
+        if ($driver === 'sqlite') {
+            $tables = $connection->select("SELECT name, sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name");
+
+            foreach ($tables as $tableObj) {
+                $table = $tableObj->name;
+                $createTableSql = $tableObj->sql;
+
+                if (!$createTableSql) {
+                    continue;
+                }
+
+                $sql[] = "DROP TABLE IF EXISTS \"{$table}\";";
+                $sql[] = $createTableSql . ';';
+
+                $rows = $connection->table($table)->get();
+                if ($rows->isNotEmpty()) {
+                    $columns = array_keys((array) $rows->first());
+                    $columnList = implode(', ', array_map(fn($col) => "\"{$col}\"", $columns));
+
+                    foreach ($rows as $row) {
+                        $rowArray = (array) $row;
+                        $values = array_map(function ($value) use ($pdo) {
+                            if ($value === null) {
+                                return 'NULL';
+                            }
+
+                            return $pdo->quote((string) $value);
+                        }, $rowArray);
+
+                        $sql[] = "INSERT INTO \"{$table}\" ({$columnList}) VALUES (" . implode(', ', $values) . ");";
+                    }
+                }
+
+                $sql[] = '';
+            }
+        }
+
+        $fileName = "{$dbName}_backup_{$timestamp}.sql";
+
+        $content = implode("\n", $sql);
+
+        return response()->streamDownload(function () use ($content) {
+            echo $content;
+        }, $fileName, [
+            'Content-Type' => 'application/sql; charset=UTF-8',
+        ]);
     }
 
     public function reports(Request $request)

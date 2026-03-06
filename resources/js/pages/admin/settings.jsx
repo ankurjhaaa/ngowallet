@@ -17,6 +17,15 @@ export default function Settings() {
                 <p className="text-xs sm:text-sm text-gray-500 mt-1">
                     Configure site-wide parameters
                 </p>
+                <div className="mt-3">
+                    <a
+                        href="/admin/settings/database-backup"
+                        className="inline-flex items-center gap-2 px-4 h-9 rounded-md bg-emerald-700 text-white text-sm font-medium hover:bg-emerald-800 transition"
+                    >
+                        <i className="fas fa-download text-xs"></i>
+                        Download Database Backup (.sql)
+                    </a>
+                </div>
             </div>
 
             <form onSubmit={submit} className="bg-white rounded-lg shadow-sm p-6 max-w-2xl">

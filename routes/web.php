@@ -40,6 +40,7 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/users', 'users')->name('users');
     Route::get('/settings', 'settings')->name('settings');
     Route::post('/settings', 'updateSettings')->name('settings.update');
+    Route::get('/settings/database-backup', 'downloadDatabaseBackup')->name('settings.database-backup');
     Route::get('/reports', 'reports')->name('reports');
 
     // Plan CRUD
