@@ -217,6 +217,16 @@ export default function Profile() {
  <InfoField icon={<Calendar className="h-4 w-4"/>} label="D.O.B"value={formatDate(user.date_of_birth)} />
  <InfoField icon={<MapPin className="h-4 w-4"/>} label="Residential Address"value={user.address ||'Address not updated'} />
  </div>
+ <div className="mt-8 pt-6 border-t border-slate-50 flex flex-col gap-3">
+ <Link href="/privacy-policy"className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-600 flex items-center gap-2 transition-colors">
+ <ShieldCheck className="h-3.5 w-3.5"/>
+ Privacy Policy
+ </Link>
+ <Link href="/delete-account"className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-red-600 flex items-center gap-2 transition-colors">
+ <Trash2 className="h-3.5 w-3.5"/>
+ Delete Account
+ </Link>
+ </div>
  </Card>
 
  <Card className="border-none bg-slate-900 text-white rounded-[24px] p-6 transform -rotate-1 group hover:rotate-0 transition-transform relative overflow-hidden shadow-xl">

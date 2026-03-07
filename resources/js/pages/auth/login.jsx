@@ -113,8 +113,12 @@ export default function Login() {
  </form>
  </CardContent>
  
- <CardFooter className="bg-slate-50/50 px-8 py-4 border-t border-slate-50 flex justify-center">
- <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 tracking-widest">
+ <CardFooter className="bg-slate-50/50 px-8 py-4 border-t border-slate-50 flex flex-col gap-3 items-center">
+ <div className="flex gap-4">
+ <Link href="/privacy-policy"className="text-[10px] uppercase font-black text-slate-400 hover:text-red-600 tracking-widest transition-colors">Privacy Policy</Link>
+ <Link href="/delete-account"className="text-[10px] uppercase font-black text-slate-400 hover:text-red-600 tracking-widest transition-colors">Delete Account</Link>
+ </div>
+ <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 tracking-widest opacity-60">
  <ShieldCheck className="h-3.5 w-3.5 text-emerald-500"/>
  Secured Portal Login
  </div>

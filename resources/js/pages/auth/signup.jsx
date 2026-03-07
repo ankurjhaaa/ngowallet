@@ -125,13 +125,17 @@ export default function Signup() {
  </Button>
  </form>
  </CardContent>
- 
- <CardFooter className="bg-slate-50/50 px-8 py-4 border-t border-slate-50 flex justify-center">
- <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 tracking-widest">
- <CheckCircle2 className="h-4 w-4 text-emerald-500"/>
- Instant Membership Activation
- </div>
- </CardFooter>
+  
+ <CardFooter className="bg-slate-50/50 px-8 py-4 border-t border-slate-50 flex flex-col gap-3 items-center">
+  <div className="flex gap-4">
+  <Link href="/privacy-policy"className="text-[10px] uppercase font-black text-slate-400 hover:text-red-600 tracking-widest transition-colors">Privacy Policy</Link>
+  <Link href="/delete-account"className="text-[10px] uppercase font-black text-slate-400 hover:text-red-600 tracking-widest transition-colors">Delete Account</Link>
+  </div>
+  <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 tracking-widest opacity-60">
+  <CheckCircle2 className="h-4 w-4 text-emerald-500"/>
+  Instant Membership Activation
+  </div>
+  </CardFooter>
  </Card>
  
  <div className="text-center mt-10">

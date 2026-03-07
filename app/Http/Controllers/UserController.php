@@ -122,4 +122,14 @@ class UserController extends Controller
 
         return $pdf->download($filename);
     }
+
+    public function privacyPolicy()
+    {
+        return Inertia::render('public/PrivacyPolicy');
+    }
+
+    public function deleteAccount()
+    {
+        return Inertia::render('public/DeleteAccount');
+    }
 }
