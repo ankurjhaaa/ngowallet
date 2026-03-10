@@ -19,6 +19,7 @@ Route::controller(UserController::class)->group(function () {
     Route::get('/profile/plan/{planId}/pdf', 'planPdf')->name('profile.plan.pdf')->middleware('auth');
     Route::get('/privacy-policy', 'privacyPolicy')->name('privacy.policy');
     Route::get('/delete-account', 'deleteAccount')->name('delete.account');
+    Route::get('/child-safety', 'childSafety')->name('child.safety');
 });
 
 Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->name('admin.')->prefix('admin')->group(function () {

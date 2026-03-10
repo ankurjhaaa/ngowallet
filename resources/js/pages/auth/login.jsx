@@ -114,7 +114,8 @@ export default function Login() {
  </CardContent>
  
  <CardFooter className="bg-slate-50/50 px-8 py-4 border-t border-slate-50 flex flex-col gap-3 items-center">
- <div className="flex gap-4">
+ <div className="flex gap-4 flex-wrap justify-center">
+ <Link href="/child-safety"className="text-[10px] uppercase font-black text-slate-400 hover:text-red-600 tracking-widest transition-colors">Child Safety</Link>
  <Link href="/privacy-policy"className="text-[10px] uppercase font-black text-slate-400 hover:text-red-600 tracking-widest transition-colors">Privacy Policy</Link>
  <Link href="/delete-account"className="text-[10px] uppercase font-black text-slate-400 hover:text-red-600 tracking-widest transition-colors">Delete Account</Link>
  </div>

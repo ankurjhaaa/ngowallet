@@ -128,6 +128,11 @@ class UserController extends Controller
         return Inertia::render('public/PrivacyPolicy');
     }
 
+    public function childSafety()
+    {
+        return Inertia::render('public/ChildSafety');
+    }
+
     public function deleteAccount()
     {
         return Inertia::render('public/DeleteAccount');
