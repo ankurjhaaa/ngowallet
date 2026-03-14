@@ -33,12 +33,14 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/transactions', 'transactions')->name('transactions');
     Route::get('/transactions/download-pdf', 'downloadCommitmentsPdf')->name('transactions.download-pdf');
     Route::post('/transactions/{payment}/send-message', 'sendMembershipMessage')->name('transactions.sendmessage');
+    Route::delete('/transactions/{payment}', 'destroyPayment')->name('transactions.destroy');
     Route::get('/add-member-page', 'addmemberpage')->name('addmemberpage');
     Route::post('/add-member', 'addmember')->name('addmember');
 
 
     Route::get('/programs', 'programs')->name('programs');
     Route::get('/users', 'users')->name('users');
+    Route::delete('/users/{id}', 'destroyUser')->name('users.destroy');
     Route::get('/settings', 'settings')->name('settings');
     Route::post('/settings', 'updateSettings')->name('settings.update');
     Route::get('/settings/database-backup', 'downloadDatabaseBackup')->name('settings.database-backup');
@@ -48,6 +50,9 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::post('/plans', 'storePlan')->name('storeplan');
     Route::put('/plans/{id}', 'updatePlan')->name('updateplan');
     Route::delete('/plans/{id}', 'destroyPlan')->name('destroyplan');
+
+    // Expense delete
+    Route::delete('/expense/{spend}', 'destroyExpense')->name('expense.destroy');
 
     // User Edit + Password
     Route::put('/user/{id}', 'updateUser')->name('updateuser');

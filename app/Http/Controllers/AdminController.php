@@ -115,6 +115,18 @@ class AdminController extends Controller
         $plan->delete();
         return redirect()->back()->with('success', 'Plan deleted successfully');
     }
+
+    public function destroyUser($id)
+    {
+        if (auth()->id() === (int) $id) {
+            return redirect()->back()->withErrors(['user' => 'You cannot delete your own account.']);
+        }
+
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->back()->with('success', 'User deleted successfully');
+    }
     public function userdetail($id)
     {
         $user = User::findOrFail($id);
@@ -429,6 +441,23 @@ class AdminController extends Controller
 
         return redirect()->back()->with('error', 'Message failed to send');
     }
+
+    public function destroyPayment(Payment $payment)
+    {
+        $userPlanId = $payment->user_plan_id;
+        $payment->delete();
+
+        if ($userPlanId) {
+            $userPlan = UserPlan::find($userPlanId);
+            if ($userPlan) {
+                $totalPaid = Payment::where('user_plan_id', $userPlanId)->sum('amount');
+                $status = $totalPaid >= $userPlan->yearly_amount ? 'completed' : 'due';
+                $userPlan->update(['status' => $status]);
+            }
+        }
+
+        return redirect()->back()->with('success', 'Transaction deleted successfully');
+    }
     public function expense(Request $request)
     {
         $expenses = Spend::latest()->paginate(8);
@@ -455,6 +484,12 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Expense added successfully');
+    }
+
+    public function destroyExpense(Spend $spend)
+    {
+        $spend->delete();
+        return redirect()->back()->with('success', 'Expense deleted successfully');
     }
     public function addmemberpage()
     {

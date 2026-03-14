@@ -26,6 +26,7 @@ export default function Transactions() {
   const [memberSearch, setMemberSearch] = useState(filters.member_query || "");
   const [openMemberModal, setOpenMemberModal] = useState(Boolean(filters.open_member_modal));
   const [sendingId, setSendingId] = useState(null);
+  const [deletingPaymentId, setDeletingPaymentId] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const buildFilterParams = (overrides = {}) => {
@@ -110,6 +111,13 @@ export default function Transactions() {
         onFinish: () => setSendingId(null),
       }
     );
+  };
+
+  const confirmDelete = (paymentId) => {
+    router.delete(`/admin/transactions/${paymentId}`, {
+      preserveScroll: true,
+      onSuccess: () => setDeletingPaymentId(null),
+    });
   };
 
   const dateOptions = [
@@ -290,13 +298,22 @@ export default function Transactions() {
                       </td>
 
                       <td className="px-4 py-4 text-right">
-                        <button
-                          onClick={() => sendMessage(payment.id)}
-                          disabled={sendingId === payment.id}
-                          className="h-9 px-4 rounded-xl bg-red-600 text-white text-[11px] font-black hover:bg-red-700 disabled:opacity-50 transition-all shadow-md active:scale-95 tracking-wide uppercase"
-                        >
-                          {sendingId === payment.id ? "..." : <><i className="fab fa-whatsapp mr-1.5"></i> Send</>}
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => sendMessage(payment.id)}
+                            disabled={sendingId === payment.id}
+                            className="h-9 px-4 rounded-xl bg-red-600 text-white text-[11px] font-black hover:bg-red-700 disabled:opacity-50 transition-all shadow-md active:scale-95 tracking-wide uppercase"
+                          >
+                            {sendingId === payment.id ? "..." : <><i className="fab fa-whatsapp mr-1.5"></i> Send</>}
+                          </button>
+                          <button
+                            onClick={() => setDeletingPaymentId(payment.id)}
+                            className="h-9 w-9 rounded-xl bg-white border border-slate-200 text-red-600 hover:bg-red-50 transition-all shadow-sm active:scale-95"
+                            title="Delete Transaction"
+                          >
+                            <i className="fas fa-trash text-[12px]"></i>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -305,6 +322,35 @@ export default function Transactions() {
             </table>
           </div>
         </div>
+
+        {deletingPaymentId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setDeletingPaymentId(null)}></div>
+            <div className="relative z-10 bg-white w-full max-w-sm rounded-md p-4 text-center animate-in fade-in zoom-in-95 duration-200">
+              <div className="w-14 h-14 bg-red-50 rounded-md flex items-center justify-center text-red-600 mx-auto mb-4">
+                <i className="fas fa-trash-alt text-xl"></i>
+              </div>
+              <h3 className="text-lg font-black text-slate-900 mb-2">Delete this transaction?</h3>
+              <p className="text-xs font-medium text-slate-500 leading-relaxed mb-4">
+                This will permanently remove the payment record. Are you sure you want to proceed?
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeletingPaymentId(null)}
+                  className="flex-1 h-11 rounded-md bg-slate-100 text-xs font-bold text-slate-600 hover:bg-slate-200 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => confirmDelete(deletingPaymentId)}
+                  className="flex-1 h-11 rounded-md bg-red-700 text-white text-xs font-bold hover:bg-red-800 transition"
+                >
+                  Delete Now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 flex justify-center sm:justify-end gap-1.5 flex-wrap px-1">
           {payments.links.map((link, index) => (

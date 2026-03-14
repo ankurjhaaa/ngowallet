@@ -1,8 +1,10 @@
+import { useState } from "react";
 import AdminLayout from"@/layouts/AdminLayout";
 import { useForm, usePage, router } from"@inertiajs/react";
 
 export default function addexpence() {
  const { expenses } = usePage().props;
+ const [deletingExpenseId, setDeletingExpenseId] = useState(null);
 
  const { data, setData, post, processing, errors, reset } = useForm({
  amount:"",
@@ -13,6 +15,13 @@ export default function addexpence() {
  e.preventDefault();
  post("/admin/add-expenses", {
  onSuccess: () => reset(),
+ });
+ };
+
+ const confirmDelete = (id) => {
+ router.delete(`/admin/expense/${id}`, {
+ preserveScroll: true,
+ onSuccess: () => setDeletingExpenseId(null),
  });
  };
 
@@ -145,6 +154,15 @@ export default function addexpence() {
  <p className="text-sm text-gray-700 leading-relaxed">
  {exp.description}
  </p>
+ <div className="mt-3 flex justify-end">
+ <button
+  onClick={() => setDeletingExpenseId(exp.id)}
+  className="h-7 px-3 rounded-md bg-white border border-gray-200 text-[10px] font-bold text-red-700 hover:bg-red-50 transition"
+ >
+  <i className="fas fa-trash mr-1"></i>
+  Delete
+ </button>
+ </div>
  </div>
  ))
  )}
@@ -177,6 +195,35 @@ export default function addexpence() {
  </div>
 
  </div>
+
+ {deletingExpenseId && (
+ <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+  <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setDeletingExpenseId(null)}></div>
+  <div className="bg-white w-full max-w-sm rounded-md p-4 text-center relative z-10 animate-in fade-in zoom-in-95 duration-200">
+   <div className="w-14 h-14 bg-red-50 rounded-md flex items-center justify-center text-red-600 mx-auto mb-4">
+	<i className="fas fa-trash-alt text-xl"></i>
+   </div>
+   <h3 className="text-lg font-black text-gray-900 mb-2">Delete this expense?</h3>
+   <p className="text-xs font-medium text-gray-500 leading-relaxed mb-4">
+	This will permanently remove the expense entry. Are you sure you want to proceed?
+   </p>
+   <div className="flex gap-3">
+	<button
+	 onClick={() => setDeletingExpenseId(null)}
+	 className="flex-1 h-11 rounded-md bg-gray-100 text-xs font-bold text-gray-600 hover:bg-gray-200 transition"
+	>
+	 Cancel
+	</button>
+	<button
+	 onClick={() => confirmDelete(deletingExpenseId)}
+	 className="flex-1 h-11 rounded-md bg-red-800 text-white text-xs font-bold hover:bg-red-900 transition"
+	>
+	 Delete Now
+	</button>
+   </div>
+  </div>
+ </div>
+ )}
 
  </AdminLayout>
  );

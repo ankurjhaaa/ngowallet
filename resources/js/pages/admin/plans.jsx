@@ -103,6 +103,13 @@ export default function Plans() {
  >
  <i className="fas fa-edit text-xs"></i>
  </button>
+ <button
+ onClick={() => setDeletingId(plan.id)}
+ className="h-8 w-8 rounded-md bg-white border border-gray-100 flex items-center justify-center text-red-600 hover:bg-red-700 hover:text-white transition"
+ title="Delete Plan"
+ >
+ <i className="fas fa-trash-alt text-xs"></i>
+ </button>
  
  </div>
  </td>
@@ -142,6 +149,13 @@ export default function Plans() {
  >
  <i className="fas fa-edit"></i>
  Edit
+ </button>
+ <button
+ onClick={() => setDeletingId(plan.id)}
+ className="h-8 px-3 rounded-md bg-red-50 text-red-800 text-[10px] font-bold hover:bg-red-100 transition flex items-center gap-1.5"
+ >
+ <i className="fas fa-trash"></i>
+ Delete
  </button>
  </div>
 
