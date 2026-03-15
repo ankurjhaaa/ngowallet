@@ -5,6 +5,8 @@ import { useForm, usePage, router } from"@inertiajs/react";
 export default function addexpence() {
  const { expenses } = usePage().props;
  const [deletingExpenseId, setDeletingExpenseId] = useState(null);
+ const [isDeleting, setIsDeleting] = useState(false);
+ const [deleteStatus, setDeleteStatus] = useState(null);
 
  const { data, setData, post, processing, errors, reset } = useForm({
  amount:"",
@@ -19,9 +21,18 @@ export default function addexpence() {
  };
 
  const confirmDelete = (id) => {
+ setIsDeleting(true);
+ setDeleteStatus(null);
  router.delete(`/admin/expense/${id}`, {
  preserveScroll: true,
- onSuccess: () => setDeletingExpenseId(null),
+ onFinish: () => setIsDeleting(false),
+ onSuccess: () => {
+	setDeleteStatus("success");
+	setTimeout(() => {
+		setDeletingExpenseId(null);
+		setDeleteStatus(null);
+	}, 1500);
+ },
  });
  };
 
@@ -198,7 +209,14 @@ export default function addexpence() {
 
  {deletingExpenseId && (
  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-  <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setDeletingExpenseId(null)}></div>
+ <div
+	className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"
+	onClick={() => {
+		if (isDeleting) return;
+		setDeletingExpenseId(null);
+		setDeleteStatus(null);
+	}}
+ ></div>
   <div className="bg-white w-full max-w-sm rounded-md p-4 text-center relative z-10 animate-in fade-in zoom-in-95 duration-200">
    <div className="w-14 h-14 bg-red-50 rounded-md flex items-center justify-center text-red-600 mx-auto mb-4">
 	<i className="fas fa-trash-alt text-xl"></i>
@@ -207,18 +225,35 @@ export default function addexpence() {
    <p className="text-xs font-medium text-gray-500 leading-relaxed mb-4">
 	This will permanently remove the expense entry. Are you sure you want to proceed?
    </p>
+	 {deleteStatus === "success" && (
+		<div className="mb-4 rounded-md bg-emerald-50 border border-emerald-100 p-2 text-emerald-700 text-xs font-bold">
+		 Expense deleted successfully.
+		</div>
+	 )}
    <div className="flex gap-3">
 	<button
-	 onClick={() => setDeletingExpenseId(null)}
+		 onClick={() => {
+			setDeletingExpenseId(null);
+			setDeleteStatus(null);
+		 }}
+		disabled={isDeleting}
 	 className="flex-1 h-11 rounded-md bg-gray-100 text-xs font-bold text-gray-600 hover:bg-gray-200 transition"
 	>
 	 Cancel
 	</button>
 	<button
 	 onClick={() => confirmDelete(deletingExpenseId)}
-	 className="flex-1 h-11 rounded-md bg-red-800 text-white text-xs font-bold hover:bg-red-900 transition"
+		disabled={isDeleting}
+		className="flex-1 h-11 rounded-md bg-red-800 text-white text-xs font-bold hover:bg-red-900 transition disabled:opacity-70"
 	>
-	 Delete Now
+		{isDeleting ? (
+		 <span className="inline-flex items-center gap-2">
+		  <span className="h-3.5 w-3.5 rounded-full border-2 border-white/60 border-t-white animate-spin"></span>
+		  Deleting...
+		 </span>
+		) : (
+		 "Delete Now"
+		)}
 	</button>
    </div>
   </div>

@@ -109,7 +109,7 @@ class AdminController extends Controller
         $plan = Plan::findOrFail($id);
 
         if ($plan->userPlans()->exists()) {
-            return redirect()->back()->withErrors(['plan' => 'Cannot delete plan — it is assigned to users.']);
+            return redirect()->back()->with('error', 'Cannot delete plan — it is assigned to users.');
         }
 
         $plan->delete();
@@ -119,7 +119,7 @@ class AdminController extends Controller
     public function destroyUser($id)
     {
         if (auth()->id() === (int) $id) {
-            return redirect()->back()->withErrors(['user' => 'You cannot delete your own account.']);
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
         }
 
         $user = User::findOrFail($id);

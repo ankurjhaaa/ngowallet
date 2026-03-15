@@ -27,6 +27,8 @@ export default function Transactions() {
   const [openMemberModal, setOpenMemberModal] = useState(Boolean(filters.open_member_modal));
   const [sendingId, setSendingId] = useState(null);
   const [deletingPaymentId, setDeletingPaymentId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState(null);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   const buildFilterParams = (overrides = {}) => {
@@ -114,9 +116,18 @@ export default function Transactions() {
   };
 
   const confirmDelete = (paymentId) => {
+    setIsDeleting(true);
+    setDeleteStatus(null);
     router.delete(`/admin/transactions/${paymentId}`, {
       preserveScroll: true,
-      onSuccess: () => setDeletingPaymentId(null),
+      onFinish: () => setIsDeleting(false),
+      onSuccess: () => {
+        setDeleteStatus("success");
+        setTimeout(() => {
+          setDeletingPaymentId(null);
+          setDeleteStatus(null);
+        }, 1500);
+      },
     });
   };
 
@@ -325,7 +336,14 @@ export default function Transactions() {
 
         {deletingPaymentId && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setDeletingPaymentId(null)}></div>
+            <div
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+              onClick={() => {
+                if (isDeleting) return;
+                setDeletingPaymentId(null);
+                setDeleteStatus(null);
+              }}
+            ></div>
             <div className="relative z-10 bg-white w-full max-w-sm rounded-md p-4 text-center animate-in fade-in zoom-in-95 duration-200">
               <div className="w-14 h-14 bg-red-50 rounded-md flex items-center justify-center text-red-600 mx-auto mb-4">
                 <i className="fas fa-trash-alt text-xl"></i>
@@ -334,18 +352,35 @@ export default function Transactions() {
               <p className="text-xs font-medium text-slate-500 leading-relaxed mb-4">
                 This will permanently remove the payment record. Are you sure you want to proceed?
               </p>
+              {deleteStatus === "success" && (
+                <div className="mb-4 rounded-md bg-emerald-50 border border-emerald-100 p-2 text-emerald-700 text-xs font-bold">
+                  Transaction deleted successfully.
+                </div>
+              )}
               <div className="flex gap-3">
                 <button
-                  onClick={() => setDeletingPaymentId(null)}
+                  onClick={() => {
+                    setDeletingPaymentId(null);
+                    setDeleteStatus(null);
+                  }}
+                  disabled={isDeleting}
                   className="flex-1 h-11 rounded-md bg-slate-100 text-xs font-bold text-slate-600 hover:bg-slate-200 transition"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => confirmDelete(deletingPaymentId)}
-                  className="flex-1 h-11 rounded-md bg-red-700 text-white text-xs font-bold hover:bg-red-800 transition"
+                  disabled={isDeleting}
+                  className="flex-1 h-11 rounded-md bg-red-700 text-white text-xs font-bold hover:bg-red-800 transition disabled:opacity-70"
                 >
-                  Delete Now
+                  {isDeleting ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-3.5 w-3.5 rounded-full border-2 border-white/60 border-t-white animate-spin"></span>
+                      Deleting...
+                    </span>
+                  ) : (
+                    "Delete Now"
+                  )}
                 </button>
               </div>
             </div>
