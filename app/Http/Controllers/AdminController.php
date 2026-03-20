@@ -143,6 +143,22 @@ class AdminController extends Controller
                 'lifetimePaid' => $totalPaidLifetime,
             ],
             'ngo_plans' => Plan::all(),
+            'recent_payments' => Payment::with('userPlan.plan')
+                ->where('user_id', $id)
+                ->latest('payment_date')
+                ->latest('id')
+                ->take(3)
+                ->get()
+                ->map(function ($payment) {
+                    return [
+                        'id' => $payment->id,
+                        'amount' => $payment->amount,
+                        'payment_date' => $payment->payment_date,
+                        'payment_mode' => $payment->payment_mode,
+                        'plan_name' => $payment->userPlan?->plan?->name,
+                        'receipt_url' => route('admin.payments.receipt', $payment->id),
+                    ];
+                }),
             'user_plans' => UserPlan::with('plan')
                 ->where('user_id', $id)
                 ->latest()
@@ -159,9 +175,11 @@ class AdminController extends Controller
                         'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
                         'payments' => $up->payments()->latest()->get()->map(function ($payment) {
                             return [
+                                'id' => $payment->id,
                                 'amount' => $payment->amount,
                                 'payment_date' => $payment->payment_date,
                                 'payment_mode' => $payment->payment_mode,
+                                'receipt_url' => route('admin.payments.receipt', $payment->id),
                             ];
                         }),
                     ];
@@ -183,9 +201,11 @@ class AdminController extends Controller
                         'percentage_paid' => $up->yearly_amount > 0 ? round((($up->yearly_amount - $up->dueAmount()) / $up->yearly_amount) * 100) : 0,
                         'payments' => $up->payments()->latest()->get()->map(function ($payment) {
                             return [
+                                'id' => $payment->id,
                                 'amount' => $payment->amount,
                                 'payment_date' => $payment->payment_date,
                                 'payment_mode' => $payment->payment_mode,
+                                'receipt_url' => route('admin.payments.receipt', $payment->id),
                             ];
                         }),
                     ];
@@ -265,7 +285,73 @@ class AdminController extends Controller
             UserPlan::where('id', $request->plan_id)->update(['status' => 'completed']);
         }
 
-        return redirect()->back()->with('success', 'Payment added successfully');
+        $userPlan = UserPlan::with('plan')->find($request->plan_id);
+        $totalPaidNow = Payment::where('user_plan_id', $request->plan_id)->sum('amount');
+        $dueAmountNow = $userPlan ? $userPlan->yearly_amount - $totalPaidNow : null;
+        $recentPayments = Payment::where('user_plan_id', $request->plan_id)
+            ->latest('payment_date')
+            ->latest('id')
+            ->take(3)
+            ->get()
+            ->map(function ($p) {
+                return [
+                    'amount' => $p->amount,
+                    'payment_date' => Carbon::parse($p->payment_date)->format('d M Y'),
+                    'payment_mode' => strtoupper($p->payment_mode),
+                ];
+            })
+            ->toArray();
+
+        $receiptData = [
+            'receipt_no' => 'BH-PAY-' . $payment->id,
+            'payment_id' => $payment->id,
+            'user_name' => $payment->user?->name,
+            'user_phone' => $payment->user?->phone,
+            'plan_name' => $userPlan?->plan?->name,
+            'amount' => $payment->amount,
+            'total_paid' => $totalPaidNow,
+            'due_amount' => $dueAmountNow,
+            'payment_mode' => strtoupper($payment->payment_mode),
+            'payment_date' => Carbon::parse($payment->payment_date)->format('d M Y'),
+            'receipt_url' => route('admin.payments.receipt', $payment->id),
+            'recent_payments' => $recentPayments,
+        ];
+
+        return redirect()->back()
+            ->with('success', 'Payment added successfully')
+            ->with('receipt', $receiptData);
+    }
+
+    public function paymentReceipt(Payment $payment)
+    {
+        $payment->load(['user', 'userPlan.plan']);
+
+        $defaults = [
+            'ngo_name' => 'Bazm-e-Haidri',
+            'ngo_email' => 'info@bazm-e-haidri.org',
+            'ngo_phone' => '+91 90000 00000',
+            'ngo_address' => 'NGO Address, City, State, India',
+        ];
+
+        $settings = Setting::orderBy('key')->get()->mapWithKeys(fn($s) => [$s->key => $s->value]);
+        $settings = collect($defaults)->merge($settings)->toArray();
+
+        $data = [
+            'org_name' => $settings['ngo_name'],
+            'org_address' => $settings['ngo_address'],
+            'org_phone' => $settings['ngo_phone'],
+            'org_email' => $settings['ngo_email'],
+            'receipt_no' => 'BH-PAY-' . $payment->id,
+            'issued_date' => Carbon::parse($payment->payment_date)->format('d M Y'),
+            'user' => $payment->user,
+            'plan_name' => $payment->userPlan?->plan?->name ?? 'Plan',
+            'amount' => $payment->amount,
+            'payment_mode' => strtoupper($payment->payment_mode),
+            'payment_date' => Carbon::parse($payment->payment_date)->format('d M Y'),
+        ];
+
+        $pdf = Pdf::loadView('pdf.payment-receipt', $data)->setPaper('a4');
+        return $pdf->download('Payment-Receipt-' . $payment->id . '.pdf');
     }
 
     public function transactions(Request $request)

@@ -1,4 +1,4 @@
-import { useState } from"react";
+import { useEffect, useState } from"react";
 import AdminLayout from"@/layouts/AdminLayout";
 import { useForm, usePage, router } from"@inertiajs/react";
 
@@ -13,6 +13,8 @@ export default function UserDetail() {
  ngo_plans = [],
  user_plans = [],
  due_plans =[],
+ recent_payments = [],
+ flash = {},
  } = usePage().props;
 
  const formatDate = (date) => {
@@ -32,6 +34,8 @@ export default function UserDetail() {
  const [showPasswordModal, setShowPasswordModal] = useState(false);
  const [openPayments, setOpenPayments] = useState({});
  const [showPlanModal, setShowPlanModal] = useState(false);
+ const [showReceiptModal, setShowReceiptModal] = useState(false);
+ const [receiptData, setReceiptData] = useState(null);
 
  // Only sum up positive due amounts. Over-payments (negative dues) are ignored.
  const totalDeu = user_plans.reduce((acc, up) => acc + Math.max(0, up.due_amount), 0);
@@ -56,6 +60,36 @@ export default function UserDetail() {
  onSuccess: () => reset(),
  });
  }
+
+ useEffect(() => {
+	if (flash?.receipt) {
+		setReceiptData(flash.receipt);
+		setShowReceiptModal(true);
+	}
+ }, [flash?.receipt]);
+
+ const openReceiptFromPayment = (payment) => {
+	const normalized = {
+		receipt_no: `BH-PAY-${payment.id}`,
+		payment_id: payment.id,
+		user_name: user.name,
+		user_phone: user.phone,
+		plan_name: payment.plan_name || plan?.name,
+		amount: payment.amount,
+		total_paid: receiptData?.total_paid ?? null,
+		due_amount: receiptData?.due_amount ?? null,
+		payment_mode: (payment.payment_mode || "cash").toString().toUpperCase(),
+		payment_date: payment.payment_date ? formatDate(payment.payment_date) : "-",
+		receipt_url: payment.receipt_url,
+		recent_payments: recent_payments.map((p) => ({
+			amount: p.amount,
+			payment_date: formatDate(p.payment_date),
+			payment_mode: (p.payment_mode || "cash").toString().toUpperCase(),
+		})),
+	};
+	setReceiptData(normalized);
+	setShowReceiptModal(true);
+ };
 
  return (
  <AdminLayout title="User Dashboard">
@@ -341,10 +375,110 @@ export default function UserDetail() {
  </form>
  </div>
 
+ <div className="bg-white rounded-md p-4 border border-gray-100 mb-4">
+  <h2 className="text-xs sm:text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+   <i className="fas fa-clock text-red-800"></i>
+   Recent 3 Transactions
+  </h2>
+  {recent_payments.length === 0 ? (
+   <div className="text-[11px] text-gray-400">No recent transactions.</div>
+  ) : (
+   <div className="space-y-2">
+	{recent_payments.map((p) => (
+	 <div key={p.id} className="flex items-center justify-between gap-2 rounded-md border border-gray-100 bg-gray-50 px-3 py-2 text-[11px]">
+	  <div className="font-bold text-gray-900">₹{Number(p.amount || 0).toLocaleString()}</div>
+	  <div className="text-gray-500">{formatDate(p.payment_date)}</div>
+	  <div className="text-gray-500 uppercase text-[10px] font-bold">{p.payment_mode}</div>
+	  <button
+	   onClick={() => openReceiptFromPayment(p)}
+	   className="h-7 px-3 rounded-md bg-emerald-600 text-white text-[10px] font-bold hover:bg-emerald-700 transition"
+	  >
+	   Send
+	  </button>
+	 </div>
+	))}
+   </div>
+  )}
+ </div>
+
  {/* Modals remain mostly the same but could use minor styling tweaks to match the new theme */}
  {showPlanModal && <PlanModal onClose={() => setShowPlanModal(false)} plans={ngo_plans} user_id={user.id} />}
  {showEditModal && <EditUserModal user={user} onClose={() => setShowEditModal(false)} />}
  {showPasswordModal && <ChangePasswordModal userId={user.id} onClose={() => setShowPasswordModal(false)} />}
+ {showReceiptModal && receiptData && (
+	<div className="fixed inset-0 z-[120] flex items-center justify-center p-4">
+	 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowReceiptModal(false)}></div>
+	<div className="relative bg-white w-full max-w-lg rounded-md p-5 overflow-hidden">
+		<div className="flex items-center justify-between mb-4">
+		 <div>
+			<h3 className="text-lg font-black text-gray-900">Payment Receipt</h3>
+			<p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{receiptData.receipt_no}</p>
+		 </div>
+		 <button onClick={() => setShowReceiptModal(false)} className="h-8 w-8 rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200">✕</button>
+		</div>
+
+		<div className="grid grid-cols-2 gap-3 text-xs mb-4">
+		 <div className="bg-gray-50 rounded-md p-3">
+			<p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Member</p>
+			<p className="text-sm font-black text-gray-900">{receiptData.user_name || user.name}</p>
+			<p className="text-[10px] text-gray-500">{receiptData.user_phone || user.phone || "-"}</p>
+		 </div>
+		 <div className="bg-gray-50 rounded-md p-3">
+			<p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Plan</p>
+			<p className="text-sm font-black text-gray-900">{receiptData.plan_name || "-"}</p>
+			<p className="text-[10px] text-gray-500">Date: {receiptData.payment_date}</p>
+		 </div>
+		<div className="bg-emerald-50 rounded-md p-3">
+		 <p className="text-[9px] text-emerald-700 font-bold uppercase tracking-widest">Paid Now</p>
+		 <p className="text-xl font-black text-emerald-700">₹{Number(receiptData.amount || 0).toLocaleString()}</p>
+		</div>
+		<div className="bg-gray-50 rounded-md p-3">
+		 <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Remaining</p>
+		 <p className="text-xl font-black text-gray-900">₹{Number(receiptData.due_amount ?? 0).toLocaleString()}</p>
+		</div>
+		<div className="bg-gray-50 rounded-md p-3">
+		 <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Mode</p>
+		 <p className="text-sm font-black text-gray-900">{receiptData.payment_mode || "CASH"}</p>
+		</div>
+		<div className="bg-slate-50 rounded-md p-3">
+		 <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Paid</p>
+		 <p className="text-sm font-black text-gray-900">₹{Number(receiptData.total_paid ?? 0).toLocaleString()}</p>
+		</div>
+		</div>
+
+		<div className="grid grid-cols-2 gap-2">
+		 <a
+			href={receiptData.receipt_url}
+			target="_blank"
+			rel="noreferrer"
+			className="h-10 rounded-md bg-red-700 text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-red-800 transition"
+		 >
+			<i className="fas fa-file-pdf"></i>
+			Download Receipt
+		 </a>
+		 <button
+			onClick={() => {
+				const number = receiptData.user_phone || user.phone;
+				if (!number) return;
+				const fullNumber = `91${number}`;
+				const recent = Array.isArray(receiptData.recent_payments) && receiptData.recent_payments.length
+					? ` Recent payments: ${receiptData.recent_payments.map((p, i) => `${i + 1}) Rs ${p.amount} on ${p.payment_date} (${p.payment_mode})`).join(", ")}.`
+					: "";
+				const message = `Payment received. Receipt ${receiptData.receipt_no}. Paid: Rs ${receiptData.amount}. Remaining: Rs ${receiptData.due_amount ?? 0}. Receipt link: ${receiptData.receipt_url}.${recent}`;
+				const url = `https://wa.me/${fullNumber}?text=${encodeURIComponent(message)}`;
+				window.open(url, "_blank", "noopener,noreferrer");
+			}}
+			disabled={!(receiptData.user_phone || user.phone)}
+			className="h-10 rounded-md bg-emerald-600 text-white text-xs font-bold flex items-center justify-center gap-2 hover:bg-emerald-700 transition disabled:opacity-60"
+		 >
+			<i className="fab fa-whatsapp"></i>
+			Share on WhatsApp
+		 </button>
+		</div>
+
+	 </div>
+	</div>
+ )}
  </div>
  </AdminLayout>
  );
