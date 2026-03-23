@@ -28,7 +28,6 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     Route::get('/userdetail/{id}', 'userdetail')->name('userdetail');
     Route::post('/assign-plan/{plan_id}/{user_id}', 'assignPlan')->name('assignplan');
     Route::post('/add-payment/{user_id}', 'addPayment')->name('addpayment');
-    Route::get('/payments/{payment}/receipt', 'paymentReceipt')->name('payments.receipt');
     Route::get('/expense', 'expense')->name('expense');
     Route::post('/add-expenses', 'addexpense')->name('addexpense');
     Route::get('/transactions', 'transactions')->name('transactions');
@@ -62,6 +61,9 @@ Route::controller(AdminController::class)->middleware(['auth', 'role:admin'])->n
     // User Plan PDF
     Route::get('/userdetail/{userId}/plan/{planId}/pdf', 'userPlanPdf')->name('userplan.pdf');
 });
+Route::get('admin/payments/{payment}/receipt', [AdminController::class, 'paymentReceipt'])->name('admin.payments.receipt');
+Route::get('admin/payments/{payment}/receipt/download', [AdminController::class, 'paymentReceiptDownload'])->name('admin.payments.receipt.download');
+Route::get('admin/payments/{payment}/receipt/share', [AdminController::class, 'paymentReceiptShare'])->name('admin.payments.receipt.share');
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('/login_post', 'login_post')->name('login_post');

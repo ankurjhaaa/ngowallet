@@ -156,7 +156,9 @@ class AdminController extends Controller
                         'payment_date' => $payment->payment_date,
                         'payment_mode' => $payment->payment_mode,
                         'plan_name' => $payment->userPlan?->plan?->name,
-                        'receipt_url' => route('admin.payments.receipt', $payment->id),
+                        'receipt_url' => route('admin.payments.receipt.share', $payment->id),
+                        'receipt_pdf_url' => route('admin.payments.receipt', $payment->id),
+                        'receipt_download_url' => route('admin.payments.receipt.download', $payment->id),
                     ];
                 }),
             'user_plans' => UserPlan::with('plan')
@@ -205,7 +207,9 @@ class AdminController extends Controller
                                 'amount' => $payment->amount,
                                 'payment_date' => $payment->payment_date,
                                 'payment_mode' => $payment->payment_mode,
-                                'receipt_url' => route('admin.payments.receipt', $payment->id),
+                                'receipt_url' => route('admin.payments.receipt.share', $payment->id),
+                                'receipt_pdf_url' => route('admin.payments.receipt', $payment->id),
+                                'receipt_download_url' => route('admin.payments.receipt.download', $payment->id),
                             ];
                         }),
                     ];
@@ -313,7 +317,9 @@ class AdminController extends Controller
             'due_amount' => $dueAmountNow,
             'payment_mode' => strtoupper($payment->payment_mode),
             'payment_date' => Carbon::parse($payment->payment_date)->format('d M Y'),
-            'receipt_url' => route('admin.payments.receipt', $payment->id),
+            'receipt_url' => route('admin.payments.receipt.share', $payment->id),
+            'receipt_pdf_url' => route('admin.payments.receipt', $payment->id),
+            'receipt_download_url' => route('admin.payments.receipt.download', $payment->id),
             'recent_payments' => $recentPayments,
         ];
 
@@ -351,7 +357,69 @@ class AdminController extends Controller
         ];
 
         $pdf = Pdf::loadView('pdf.payment-receipt', $data)->setPaper('a4');
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="Payment-Receipt-' . $payment->id . '.pdf"',
+        ]);
+    }
+
+    public function paymentReceiptDownload(Payment $payment)
+    {
+        $payment->load(['user', 'userPlan.plan']);
+
+        $defaults = [
+            'ngo_name' => 'Bazm-e-Haidri',
+            'ngo_email' => 'info@bazm-e-haidri.org',
+            'ngo_phone' => '+91 90000 00000',
+            'ngo_address' => 'NGO Address, City, State, India',
+        ];
+
+        $settings = Setting::orderBy('key')->get()->mapWithKeys(fn($s) => [$s->key => $s->value]);
+        $settings = collect($defaults)->merge($settings)->toArray();
+
+        $data = [
+            'org_name' => $settings['ngo_name'],
+            'org_address' => $settings['ngo_address'],
+            'org_phone' => $settings['ngo_phone'],
+            'org_email' => $settings['ngo_email'],
+            'receipt_no' => 'BH-PAY-' . $payment->id,
+            'issued_date' => Carbon::parse($payment->payment_date)->format('d M Y'),
+            'user' => $payment->user,
+            'plan_name' => $payment->userPlan?->plan?->name ?? 'Plan',
+            'amount' => $payment->amount,
+            'payment_mode' => strtoupper($payment->payment_mode),
+            'payment_date' => Carbon::parse($payment->payment_date)->format('d M Y'),
+        ];
+
+        $pdf = Pdf::loadView('pdf.payment-receipt', $data)->setPaper('a4');
         return $pdf->download('Payment-Receipt-' . $payment->id . '.pdf');
+    }
+
+    public function paymentReceiptShare(Payment $payment)
+    {
+        $payment->load(['user', 'userPlan.plan']);
+
+        $defaults = [
+            'ngo_name' => 'Bazm-e-Haidri',
+            'ngo_email' => 'info@bazm-e-haidri.org',
+            'ngo_phone' => '+91 90000 00000',
+            'ngo_address' => 'NGO Address, City, State, India',
+        ];
+
+        $settings = Setting::orderBy('key')->get()->mapWithKeys(fn($s) => [$s->key => $s->value]);
+        $settings = collect($defaults)->merge($settings)->toArray();
+
+        return view('pdf.payment-receipt-share', [
+            'org_name' => $settings['ngo_name'],
+            'receipt_no' => 'BH-PAY-' . $payment->id,
+            'member_name' => $payment->user?->name ?? 'Member',
+            'amount' => $payment->amount,
+            'payment_date' => Carbon::parse($payment->payment_date)->format('d M Y'),
+            'plan_name' => $payment->userPlan?->plan?->name ?? 'Plan',
+            'pdf_url' => route('admin.payments.receipt', $payment->id),
+            'download_url' => route('admin.payments.receipt.download', $payment->id),
+            'og_image' => asset('images/purnea_hero.png'),
+        ]);
     }
 
     public function transactions(Request $request)
